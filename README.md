@@ -22,4 +22,10 @@ su openwrt
 <a href="https://github.com/lede-project/source.git">https://github.com/lede-project/source.git</a> <br>
 first follow this link to explain to do <br>
 see <a href="https://lede-project.org/docs/guide-developer/use-buildsystem">https://lede-project.org/docs/guide-developer/use-buildsystem</a>
+<li>now aready to compile fdi-lede package</li>
+<pre>
+# login as openwrt users
+cd ~/source/package/
+git clone 
+</pre>
 </ul>
