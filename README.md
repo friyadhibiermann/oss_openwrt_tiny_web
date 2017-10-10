@@ -10,7 +10,7 @@ unzip gawk zlib1g-dev automake cmake gettext
 <pre>
 adduser openwrt
 passwd openwrt
-<input your secret password>
-<enter>
+#input your secret password>
+#enter
 </pre>
 </ul>
