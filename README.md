@@ -20,7 +20,7 @@ su openwrt
 </pre>
 <li>openwrt LEDE compile</li>
 <a href="https://github.com/lede-project/source.git">https://github.com/lede-project/source.git</a>
-<a>first follow this link to explain to do</a>
+<p>first follow this link to explain to do</p>
 <a>see <a href="https://lede-project.org/docs/guide-developer/use-buildsystem">https://lede-project.org/docs/guide-developer/use-buildsystem</a></a>
 <li>now aready to compile fdi-lede package</li>
 <pre>
