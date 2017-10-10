@@ -27,5 +27,11 @@ su openwrt
 # login as openwrt users
 cd ~/source/package/
 git clone https://github.com/friyadhibiermann/fdi-openwrt-lede.git
+cd ~/source/
+make defconfig
+sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
+make defconfig
 </pre>
 </ul>
+#NOTE:
+<strong>change value CFLAGS on ~/source/package/fdi-openwrt-lede/src/Makefile to your cpu type CFLAGS</stong>
