@@ -1,10 +1,12 @@
-# fdi-openwrt-lede
+# FDI SCRIPT
 <ul>
 <li>make sure install this package on linux OS</li>
 <pre>
 sudo apt-get update
-sudo apt-get install git-core build-essential libssl-dev libncurses5-dev unzip gawk zlib1g-dev automake cmake gettext shc
+sudo apt-get install git-core build-essential libssl-dev libncurses5-dev unzip gawk zlib1g-dev automake cmake gettext
 </pre>
+<li>compile SHC</li>
+follow this link https://github.com/neurobin/shc
 <li>create new user as root group</li>
 <pre>
 adduser openwrt
