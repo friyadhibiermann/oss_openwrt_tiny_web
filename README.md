@@ -31,6 +31,9 @@ cd ~/source/
 make defconfig
 sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
 make defconfig
+cd ~/source/ && make package/fdi-openwrt-lede/compile V=s
+find -L bin -name "*fdi*"
+<strong>#DONE<strong>
 </pre>
 </ul>
 <h3>NOTE:</h3><br>
