@@ -33,5 +33,5 @@ sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
 make defconfig
 </pre>
 </ul>
-#NOTE:
+<h1>#NOTE:<h1><br>
 <strong>change value CFLAGS on ~/source/package/fdi-openwrt-lede/src/Makefile to your cpu type CFLAGS</stong>
