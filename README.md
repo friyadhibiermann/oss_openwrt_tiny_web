@@ -9,14 +9,14 @@ sudo apt-get install git-core build-essential libssl-dev libncurses5-dev unzip g
 <pre>
 adduser openwrt
 passwd openwrt
-#input your secret password>
-#enter
+<strong>#input your secret password</strong>
+<strong>#enter</strong>
 visudo # user ass sudoer
 openwrt ALL=(ALL:ALL) ALL
-# esc + :wq + enter <<-- to save configuration
+<strong># esc + :wq + enter <<-- to save configuration</strong>
 su openwrt
-# enter your secret password
-# now successfull add user for compile openwrt package fdi
+<strong># enter your secret password</strong>
+<strong># now successfull add user for compile openwrt package fdi</strong>
 </pre>
 <li>openwrt LEDE compile</li>
 <a href="https://github.com/lede-project/source.git">https://github.com/lede-project/source.git</a>
@@ -24,7 +24,7 @@ su openwrt
 <p>see <a href="https://lede-project.org/docs/guide-developer/use-buildsystem">https://lede-project.org/docs/guide-developer/use-buildsystem</a></p>
 <li>now aready to compile fdi-lede package</li>
 <pre>
-# login as openwrt users
+<strong># login as openwrt users</strong>
 cd ~/source/package/
 git clone https://github.com/friyadhibiermann/fdi-openwrt-lede.git
 cd ~/source/
@@ -33,7 +33,7 @@ sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
 make defconfig
 cd ~/source/ && make package/fdi-openwrt-lede/compile V=s
 find -L bin -name "*fdi*"
-<strong>#DONE<strong>
+<strong>#DONE</strong>
 </pre>
 </ul>
 <h3>NOTE:</h3><br>
