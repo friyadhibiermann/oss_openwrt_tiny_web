@@ -1,4 +1,4 @@
-# FDI SCRIPT V1
+# FDI SCRIPT V2
 <ul>
 <li>make sure install this package on linux OS</li>
 <pre>
