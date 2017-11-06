@@ -1,5 +1,6 @@
 compile:
-	 CC="$(CC)" CFLAGS="-Os -pipe -mips32r2 -mtune=mips32r2" shc -r -B -f fdi.sh
-	 mv *.x fdi && rm *.x.c
+	 CC="$(CC)" CFLAGS="$(TARGET_CFLAGS)" shc -r -B -f fdi.sh
+	 CC="$(CC)" CFLAGS="$(TARGET_CFLAGS)" shc -r -B -f html
+	 mv fdi.sh.x fdi && mv html.x html && rm *.x.c
 clean:
-	rm -rf *.x *.c *.o *.c fdi
+	rm -rf *.x *.c *.o *.c fdi html
