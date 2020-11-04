@@ -129,13 +129,24 @@ fi
 }
 function setup
 {
-if [ "$SSID" != "" -o  "$KEY" != "" ];then
-        if [ "$(get_post submit)" == "check" ];then
+if [ "$(get_post ssid)" != "" ] && [ "$(get_post key)" != "" ];then
+if [ "$(get_post submit)" == "check" ];then
                 echo "<div class='text-center'>"
                         config_wireless --sid $SSID --key $KEY
+                        if [ $? == 0 ];then
+                        echo SUCCESS
+                        SSID="$(get_post ssid)"
+                        KEY="$(get_post key)"
+                        else
+                        echo FILED
+                        fi
                 echo "</div>"
-        fi
 fi
+else
+echo "<div class='text-center'>"
+printf "ISI TERLEBIH DAHULU \nSSID DAN PASSWORDNYA"
+fi
+echo "</div>"
 }
 function css_topnav
 {
