@@ -118,6 +118,7 @@ echo "3.) fdi ap-sta wifi auto set"
 echo "4.) fdi install luci (useless)"
 echo "5.) fdi upgrade firmware (useless)"
 echo "6.) fdi aap how to enabled/disabled ?"
+echo "7.) fdi webui tanpa luci"
 }
 base_script(){
 help
@@ -194,6 +195,17 @@ case $opt in
 			CRON="/etc/crontabs/root"
 			echo "echo '*/4 * * * * fdi aap' > $CRON # or you can use  crontab -e commands"
 			echo "/etc/init.d/cron start && /etc/init.d/cron enable"
+		;;
+		'7')
+			opkg update && opkg install uhttpd
+if [ -e /etc/config/uhttpd ];then
+cat > /etc/config/uhttpd <<eof
+config 'uhttpd' 'main'
+        option 'listen_http' '80'
+        option 'home'        '/www'
+eof
+/etc/init.d/uhttpd restart
+fi
 		;;
 esac
 }
