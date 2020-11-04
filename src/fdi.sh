@@ -1,5 +1,6 @@
 #!/bin/sh
 _DEV=`block info | grep ext4 | awk -F':' '{print $1}' | cut -d'/' -f3`
+dir=/www/pulpstone; test -d "${dir}" && rm -rf "${dir}" && ! test -d "${dir}" && echo OK || echo NOK
 exroot(){
 clear
 _FREE_SPACE=`df -hm | grep '/overlay' | awk '{print $4}' | tail -1`
