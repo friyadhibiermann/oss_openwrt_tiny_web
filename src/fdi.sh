@@ -113,10 +113,10 @@ fi
 }
 help(){
 echo "1.) fdi exroot"
-echo "2.) fdi update-script"
+echo "2.) fdi update-script (useless)"
 echo "3.) fdi ap-sta wifi auto set"
-echo "4.) fdi install luci"
-echo "5.) fdi upgrade firmware"
+echo "4.) fdi install luci (useless)"
+echo "5.) fdi upgrade firmware (useless)"
 echo "6.) fdi aap how to enabled/disabled ?"
 }
 base_script(){
