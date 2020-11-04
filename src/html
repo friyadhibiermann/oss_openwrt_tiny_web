@@ -22,26 +22,6 @@ function waitForHost
         echo -e "..."
     fi
 }
-
-function waitForHost1
-{
-    reachable=0;
-    while [ $reachable -eq 0 ];
-    do
-    ping -q -c 1 $1 > /dev/null
-    if [ "$?" -eq 0 ];
-    then
-        reachable=1
-                IP=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9])
-                printf "\nip found $IP\n"
-                echo "<a style='color:red;'>Connected</a>"
-        else
-                echo -n "<a style='color:blue;'>▀</a>"
-				sleep 1
-    fi
-    done
-    sleep 2
-}
 config_network(){
         conf_dir="/etc/config"
         config="network"
@@ -109,7 +89,6 @@ cat <<EOF
 </form>
 EOF
 }
-
 config_wireless(){
                 SSID=`echo "$@"|sed 's:.*--sid ::'|cut -d'-' -f1`
                 KEY=`echo "$@"|sed 's:.*--key ::'|cut -d'-' -f1`
@@ -135,11 +114,16 @@ config_wireless(){
                 wifi up
                 config_network
 }
+
 scan(){
 if [ "$(get_post scan)" == "scan" ];then
-        echo "<div class='text-center'>"
+        echo "<div class=''>"
+        n=1
         echo "<h2 style='margin-top:-50px;'>wifi detected list</h2>"
-        printf "%s\n" $(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//')
+        for i in $(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//');do
+           printf "%s\n" "<i>$n. $i</i>"
+           let n=$n+1
+        done
         echo "</div>"
 fi
 }
@@ -151,24 +135,16 @@ if [ "$SSID" != "" -o  "$KEY" != "" ];then
                         config_wireless --sid $SSID --key $KEY
                 echo "</div>"
         fi
-else
-cat <<EOF
-<div class="text-center">
-<a>ssid and password required</a>
-</div>
-EOF
 fi
 }
 function css_topnav
 {
 cat <<EOF
 body {margin:0;}
-
 .topnav {
   overflow: hidden;
   background-color: #333;
 }
-
 .topnav a {
   float: left;
   display: inline-block;
@@ -207,11 +183,9 @@ font-size:18pt;
   background-color: #ddd;
   color: black;
 }
-
 .topnav .icon {
   display: none;
 }
-
 @media screen and (max-width: 600px) {
   .topnav a:not(:first-child) {display: none;}
   .topnav a.icon {
@@ -219,7 +193,6 @@ font-size:18pt;
     display: block;
   }
 }
-
 @media screen and (max-width: 600px) {
   .topnav.responsive {position: relative;}
   .topnav.responsive .icon {
@@ -263,7 +236,6 @@ function myFunction() {
 }
 EOF
 }
-
 function css_bootstrap
 {
 cat<<EOF
@@ -283,7 +255,6 @@ cat<<EOF
 .col-xs-3  { width: 25%; }
 .col-xs-2  { width: 16.666666666666664%; }
 .col-xs-1  { width: 8.333333333333332%; }
-
 // if we reach 768px, let's use -sm columns
 @media (min-width: 768px) {
   .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
@@ -310,7 +281,6 @@ button {
     cursor: pointer;
     width: 100%;
 }
-
 button:hover {
     opacity: 0.8;
 }
@@ -335,8 +305,6 @@ input[type=button], input[type=submit], input[type=reset] {
 }
 EOF
 }
-SSID="$(get_post ssid)"
-KEY="$(get_post key)"
 echo "
 <html>
 <head>
@@ -347,10 +315,8 @@ echo "
 </head>
 <body>
 <div class=\"topnav\" id=\"myTopnav\">
-        <a><img class=\"logo\" src=\"http://felexindo.mooo.com:81/FDISERVER/img/logo.png\"></a>
         <a href=\"/cgi-bin/html\">Home</a>
         <a href=\"/cgi-bin/luci\">Luci</a>
-        <a href=\"#\">FDI-Mikodemos[coming soon]</a>
         <a href=\"javascript:void(0);\" style=\"font-size:15px;\" class=\"icon\" onclick=\"myFunction()\">&#9776;</a>
 </div>
 $(device_info)
