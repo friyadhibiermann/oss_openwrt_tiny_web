@@ -130,7 +130,7 @@ fi
 }
 function setup
 {
-if [ "$(get_post ssid)" != "" ] && [ "$(get_post key)" != "" ] && [ "$(get_post scan)" == "scan" ];then
+if [ "$(get_post ssid)" != "" ] && [ "$(get_post key)" != "" ] || [ "$(get_post scan)" == "scan" ];then
 if [ "$(get_post submit)" == "check" ];then
                 echo "<div class='text-center'>"
                         config_wireless --sid $SSID --key $KEY
