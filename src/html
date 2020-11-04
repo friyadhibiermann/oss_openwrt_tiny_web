@@ -114,12 +114,13 @@ config_wireless(){
                 wifi up
                 config_network
 }
-
+ERROR="ISI TERLEBIH DAHULU \nSSID DAN PASSWORDNYA"
 scan(){
+ERROR=""
 if [ "$(get_post scan)" == "scan" ];then
         echo "<div class=''>"
         n=1
-        echo "<h2 style='margin-top:-50px;'>wifi detected list</h2>"
+        echo "<h2 style='margin-top:-30px;'>wifi detected list</h2>"
         for i in $(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//');do
            printf "%s\n" "<i>$n. $i</i>"
            let n=$n+1
@@ -129,7 +130,7 @@ fi
 }
 function setup
 {
-if [ "$(get_post ssid)" != "" ] && [ "$(get_post key)" != "" ];then
+if [ "$(get_post ssid)" != "" ] && [ "$(get_post key)" != "" ] && [ "$(get_post scan)" == "scan" ];then
 if [ "$(get_post submit)" == "check" ];then
                 echo "<div class='text-center'>"
                         config_wireless --sid $SSID --key $KEY
@@ -144,7 +145,7 @@ if [ "$(get_post submit)" == "check" ];then
 fi
 else
 echo "<div class='text-center'>"
-printf "ISI TERLEBIH DAHULU \nSSID DAN PASSWORDNYA"
+        printf "$ERROR"
 fi
 echo "</div>"
 }
