@@ -129,84 +129,11 @@ case $opt in
 	    	exroot
 		;;
 		'2')
-			read -p "host aktif fdi lede [felexindo.mooo.com] :" host
-			read -p "port aktif fdi lede [81] :" port
-			if [ "$host" != "" ]&&[ "$port" != "" ];then
-				ping -w 1 $host > /dev/null 2>&1
-				if [ $? -eq 0 ];then
-					cd /tmp
-					rm -rf fdi
-					rm -rf html
-					wget http://$host:$port/script/fdi > /dev/null 2>&1
-					wget http://$host:$port/script/html > /dev/null 2>&1
-					if [ $? -eq 0 ];then
-						cp -rf /tmp/fdi /usr/bin/fdi
-						cp -rf /tmp/html /www/cgi-bin/html
-						chmod 0755 /usr/bin/fdi /www/cgi-bin/html
-						rm -rf fdi
-						rm -rf html
-						cd ~/
-					else
-						echo "maaf ada kesalahan dalam peng oprasian"
-						echo "silahkan ulangi"
-					fi
-				else
-					echo "maaf script belum relase atau periksa kembali koneksi anda"
-				fi
-			else
-				echo "host tidak aktif atau typo"
-			fi
-		;;
-		'3')
 			echo "list:"
 			echo "################"
 			iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'
 			echo "################"
 			config_wireless $2 $3
-		;;
-		'4')
-			read -p "host aktif fdi lede [felexindo.mooo.com] :" host
-			read -p "port aktif fdi lede [81] :" port
-			echo "ping source..."
-			ping -w 1 $host > /dev/null 2>&1
-			if [ $? -eq 0 ];then
-				echo "update.."
-				cd /tmp && opkg update > /dev/null 2>&1
-				echo "install luci..."
-				wget http://$host:$port/luci.tar.gz && tar -xzvf luci.tar.gz && cd luci && opkg install ca-bundle ca-certificates libustream-openssl ./*.ipk --force-depends --force-reinstall --force-overwrite --force-depends --force-reinstall --force-overwrite  > /dev/null 2>&1
-				echo "install luci-theme-darkmatter"
-				wget https://$host:$port/script/luci-theme-darkmatter_0.2-beta-2_all.ipk  > /dev/null 2>&1
-				opkg install luci-theme-darkmatter_0.2-beta-2_all.ipk  > /dev/null 2>&1
-				cd ~/
-				echo "fdi script updated.."
-			else
-				printf "\nconnection refused:\nplease repeart fdi wifi ap-sta\n"
-			fi
-		;;
-		'5')
-			FIND=$(find -L /tmp -name "*bin" | wc -l)
-			FILE=$(find -L /tmp -name "*bin" | tail -1)
-			if [ "$FIND" -ge 1 ];then
-				mtd -e firmware -r write $FILE firmware
-			else
-				echo "pastikan file firmware *.bin tersimpan di folder /tmp"
-			fi
-		;;
-		'6')
-			CRON="/etc/crontabs/root"
-			echo "echo '*/4 * * * * fdi aap' > $CRON # or you can use  crontab -e commands"
-			echo "/etc/init.d/cron start && /etc/init.d/cron enable"
-		;;
-		'7')
-			opkg update && opkg install uhttpd
-if [ -e /etc/config/uhttpd ];then
-cat > /etc/config/uhttpd <<eof
-config 'uhttpd' 'main'
-        option 'listen_http' '80'
-        option 'home'        '/www'
-eof
-/etc/init.d/uhttpd restart
-fi
 		;;
 esac
 }
