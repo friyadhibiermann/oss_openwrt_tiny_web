@@ -1,28 +1,26 @@
 #!/bin/sh
-_DEV=`block info | grep ext4 | awk -F':' '{print $1}' | cut -d'/' -f3`
-dir=/www/pulpstone; test -d "${dir}" && rm -rf "${dir}" && ! test -d "${dir}" && echo OK || echo NOK
 exroot(){
-clear
-_FREE_SPACE=`df -hm | grep '/overlay' | awk '{print $4}' | tail -1`
-_STAT_EX=$(df -h | grep "$_DEV" | wc -l)
-if [ "$_STAT_EX" == 1 ];then
-        echo "router sudah di exroot space = $_FREE_SPACE"
-else
-        if [ "`echo $_DEV | wc -l`" -ge '1' ];then
-                echo "preosess exroot..."
-                mount /dev/$_DEV /mnt ; tar -C /overlay -cf - . | tar -C /mnt -xf - ; umount /mnt
-                echo "selesai..."
-                block detect > /etc/config/fstab; \
-                sed -i s/option$'\t'enabled$'\t'\'0\'/option$'\t'enabled$'\t'\'1\'/ /etc/config/fstab; \
-                sed -i s#/mnt/$_DEV#/overlay# /etc/config/fstab
-                mount /dev/$_DEV /overlay
-                echo "exroot mount /dev/$_DEV"
-        else
-                echo "flashdisk dengan format ext4 belum terbaca"
-        fi
-fi
+	clear
+	_DEV=`block info | grep ext4 | awk -F':' '{print $1}' | cut -d'/' -f3`
+	_FREE_SPACE=`df -hm | grep '/overlay' | awk '{print $4}' | tail -1`
+	_STAT_EX=$(df -h | grep "$_DEV" | wc -l)
+	if [ "$_STAT_EX" == 1 ];then
+        	echo "router sudah di exroot space = $_FREE_SPACE"
+	else
+        	if [ "`echo $_DEV | wc -l`" -ge '1' ];then
+                	echo "preosess exroot..."
+                	mount /dev/$_DEV /mnt ; tar -C /overlay -cf - . | tar -C /mnt -xf - ; umount /mnt
+                	echo "selesai..."
+                	block detect > /etc/config/fstab; \
+                	sed -i s/option$'\t'enabled$'\t'\'0\'/option$'\t'enabled$'\t'\'1\'/ /etc/config/fstab; \
+                	sed -i s#/mnt/$_DEV#/overlay# /etc/config/fstab
+                	mount /dev/$_DEV /overlay
+                	echo "exroot mount /dev/$_DEV"
+        	else
+                	echo "flashdisk dengan format ext4 belum terbaca"
+        	fi
+	fi
 }
-PING=`which ping`
 
 function waitForHost
 {
@@ -68,6 +66,7 @@ config_network(){
 		/etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
+	
         read -p "SSID: " SSID
         read -p "KEY: " KEY
         conf_dir="/etc/config"
@@ -75,51 +74,32 @@ config_wireless(){
         rm -rf $conf_dir/$config
         wifi config
 		sed -i 's/default_radio0/ap/' $conf_dir/$config
-		uci -q set wireless.ap.ssid='FDI-LEDE'
+		uci -q set wireless.ap.ssid='ONIVERSAL-OSS'
 		uci -q set wireless.ap.encryption='psk2'
-		uci -q set wireless.ap.key='1234567890'
+		uci -q set wireless.ap.key='admin'
 		uci commit wireless
         if [ "$SSID" != "" -o "$KEY" != "" ];then
-			uci set wireless.radio0.disabled='0'
-			uci set wireless.sta='wifi-iface'
-			uci set wireless.sta.network='wlan'
-			uci set wireless.sta.encryption='psk2'
-			uci set wireless.sta.device='radio0'
-			uci set wireless.sta.mode='sta'
-			uci set wireless.sta.key="$KEY"
-			uci set wireless.sta.ssid="$SSID"
-			uci commit wireless
-			config_network
-		fi
+		uci set wireless.radio0.disabled='0'
+		uci set wireless.sta='wifi-iface'
+		uci set wireless.sta.network='wlan'
+		uci set wireless.sta.encryption='psk2'
+		uci set wireless.sta.device='radio0'
+		uci set wireless.sta.mode='sta'
+		uci set wireless.sta.key="$KEY"
+		uci set wireless.sta.ssid="$SSID"
+		uci commit wireless
+		config_network
+	fi
 }
 
-aap(){
-ping -w 10 google.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	UNDERLINE=$(echo -e "\e[1;4mmode AP-STA")
-	echo "$UNDERLINE"
-	RED='\033[0;32m'
-	printf "${RED} Connected\n"
-	echo "mode AP+STA" > /root/wifi.log
-else
-	UNDERLINE=$(echo -e "\e[1;4mmode AP")
-	RED='\033[1;31m';
-	echo "$UNDERLINE"
-	printf "${RED}Not Connected\n"
-	uci -q del wireless.sta
-	uci commit wireless
-	wifi up
-	echo "mode AP" > /root/wifi.log
-fi
-}
 help(){
-echo "1.) fdi exroot"
-echo "2.) fdi ap-sta wifi auto set"
+	echo "1.) fdi exroot"
+	echo "2.) fdi ap-sta wifi auto set"
 }
 base_script(){
-help
-read -p "masukan pilihan [1-2] :" opt
-case $opt in
+	help
+	read -p "masukan pilihan [1-2] :" opt
+	case $opt in
 		'1')
 	    	exroot
 		;;
@@ -129,14 +109,11 @@ case $opt in
 			uci set wireless.radio0.disabled='0'
 			uci commit wireless
 			wifi up
+			sleep 2
 			iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'
 			echo "################"
 			config_wireless $2 $3
 		;;
-esac
+	esac
 }
-if [ "$1" == "aap" ];then
-	aap
-else
-	base_script
-fi
+base_script
