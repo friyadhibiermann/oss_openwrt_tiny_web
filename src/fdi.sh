@@ -35,6 +35,7 @@ function waitForHost
 
 function waitForHost1
 {
+    wifi up
     reachable=0;
     while [ $reachable -eq 0 ];
     do
