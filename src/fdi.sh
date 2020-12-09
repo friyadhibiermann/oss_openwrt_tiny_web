@@ -57,13 +57,13 @@ config_network(){
         uci -q set network.wlan.netmask='255.255.255.0'
         uci -q set network.wlan.proto='dhcp'
         uci commit network
-		uci -q set firewall.cfg04dc81.network=lan
-		uci -q set firewall.cfg06dc81.network='wan wan6 wlan'
-		wifi up
+	uci -q set firewall.cfg04dc81.network=lan
+	uci -q set firewall.cfg06dc81.network='wan wan6 wlan'
+	uci commit firewall
+	/etc/init.d/firewall restart > /dev/null 2>&1
         waitForHost google.com
-		wifi up
-		/etc/init.d/firewall restart > /dev/null 2>&1
-		/etc/init.d/network restart > /dev/null 2>&1
+	wifi up
+	/etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
 	
@@ -108,8 +108,8 @@ base_script(){
 			echo "################"
 			uci set wireless.radio0.disabled='0'
 			uci commit wireless
-			wifi up
 			sleep 2
+			wifi up
 			iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'
 			echo "################"
 			config_wireless $2 $3
