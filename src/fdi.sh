@@ -96,6 +96,7 @@ help(){
 	echo "2.) fdi ap-sta wifi auto set"
 }
 base_script(){
+rm /etc/config/wireless > /dev/null 2>&1
 wifi config
 uci set wireless.radio0.disabled='0'
 uci commit wireless
