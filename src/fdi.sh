@@ -66,7 +66,6 @@ config_network(){
 	/etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
-	
         read -p "SSID: " SSID
         read -p "KEY: " KEY
         conf_dir="/etc/config"
@@ -97,6 +96,10 @@ help(){
 	echo "2.) fdi ap-sta wifi auto set"
 }
 base_script(){
+wifi config
+uci set wireless.radio0.disabled='0'
+uci commit wireless
+wifi up
 	help
 	read -p "masukan pilihan [1-2] :" opt
 	case $opt in
@@ -106,10 +109,6 @@ base_script(){
 		'2')
 			echo "list:"
 			echo "################"
-			uci set wireless.radio0.disabled='0'
-			uci commit wireless
-			sleep 2
-			wifi up
 			iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'
 			echo "################"
 			config_wireless $2 $3
