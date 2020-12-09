@@ -126,6 +126,9 @@ case $opt in
 		'2')
 			echo "list:"
 			echo "################"
+			uci set wireless.radio0.disabled='0'
+			uci commit wireless
+			wifi up
 			iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'
 			echo "################"
 			config_wireless $2 $3
