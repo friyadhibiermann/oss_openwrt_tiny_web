@@ -31,7 +31,7 @@ cd ~/source/package/
 git clone https://github.com/friyadhibiermann/oss_openwrt_tiny_web.git
 cd ~/source/
 make defconfig
-sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
+sed -i 's/# CONFIG_PACKAGE_oss is not set/CONFIG_PACKAGE_oss=y/g' .config
 make defconfig
 cd ~/source/ && make package/oss_openwrt_tiny_web/compile V=s
 find -L bin -name "*oss*"
