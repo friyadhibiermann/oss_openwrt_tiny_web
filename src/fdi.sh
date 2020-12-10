@@ -62,8 +62,8 @@ config_network(){
 	uci -q set firewall.cfg06dc81.network='wan wan6 wlan'
 	uci commit firewall
 	/etc/init.d/firewall restart > /dev/null 2>&1
-        waitForHost google.com
 	wifi up
+        waitForHost google.com
 	/etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
@@ -72,7 +72,6 @@ config_wireless(){
         conf_dir="/etc/config"
         config="wireless"
         rm -rf $conf_dir/$config
-        wifi config
 		sed -i 's/default_radio0/ap/' $conf_dir/$config
 		uci -q set wireless.ap.ssid='ONIVERSAL-OSS'
 		uci -q set wireless.ap.encryption='psk2'
@@ -88,6 +87,7 @@ config_wireless(){
 		uci set wireless.sta.key="$KEY"
 		uci set wireless.sta.ssid="$SSID"
 		uci commit wireless
+		wifi up
 		config_network
 	fi
 }
@@ -99,6 +99,7 @@ help(){
 base_script(){
 rm /etc/config/wireless > /dev/null 2>&1
 wifi config
+sleep 2
 uci set wireless.radio0.disabled='0'
 uci commit wireless
 wifi up
