@@ -569,7 +569,15 @@ base_script(){
 		wifi up
 		done
 }
-
+get_post(){
+     for qr in $QUERY_STRING
+     do
+          if [ "${qr%%=*}" == "$1" ];then
+              echo ${qr##*=}| sed 's/+/ /g'
+              break
+          fi
+     done
+}
 oniversal(){
 case $1 in
         'web')
