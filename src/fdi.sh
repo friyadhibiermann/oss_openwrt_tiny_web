@@ -578,6 +578,10 @@ get_post(){
           fi
      done
 }
+query_fix(){
+QUERY_STRING=$(echo $QUERY_STRING | sed 's/&/ /g')
+QUERY_STRING=$(echo $QUERY_STRING | sed 's/%3A/:/g')
+}
 oniversal(){
 case $1 in
         'web')
