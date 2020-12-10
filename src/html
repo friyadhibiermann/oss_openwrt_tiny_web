@@ -1,5 +1,5 @@
 #!/bin/sh
 echo "Content-type: text/html"
 echo ""
-. fdi.sh
+. oss
 oniversal web CV.ONIVERSAL [**password**]

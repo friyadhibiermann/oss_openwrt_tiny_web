@@ -1,4 +1,4 @@
-# Copyright (C) 2017 FDI machine team.
+# Copyright (C) 2017 oss machine team.
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,8 +8,8 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=fdi
-PKG_RELEASE:=1.0.3
+PKG_NAME:=oss
+PKG_RELEASE:=1.0.4
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)/ipkg-install
@@ -17,16 +17,16 @@ PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)/ipkg-install
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
-define Package/fdi
+define Package/oss
   SECTION:=MYSCRIPT
-  CATEGORY:=FDI
-  SUBMENU :=fdi
-  TITLE:=FDI_LEDES_SCRIPT
+  CATEGORY:=oss
+  SUBMENU :=oss
+  TITLE:=oss_LEDES_SCRIPT
   DEPENDS:=
 endef
 
-define Package/fdi/description
-	fdi script - for do everything
+define Package/oss/description
+	oss script - for do everything
 endef
 
 define Build/Prepare
@@ -41,11 +41,11 @@ define Build/Compile
 		CXXFLAGS="$(CFLAGS)"
 endef
 
-define Package/fdi/install
+define Package/oss/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/www/cgi-bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fdi $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/oss $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/html $(1)/www/cgi-bin/
 endef
 
-$(eval $(call BuildPackage,fdi))
+$(eval $(call BuildPackage,oss))
