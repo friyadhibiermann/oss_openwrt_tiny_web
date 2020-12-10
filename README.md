@@ -1,4 +1,4 @@
-# FDI SCRIPT V2
+# OSS SCRIPT V2
 <ul>
 <li>make sure install this package on linux OS</li>
 <pre>
@@ -24,19 +24,19 @@ su openwrt
 <a href="https://github.com/lede-project/source.git">https://github.com/lede-project/source.git</a>
 <p>first follow this link :</p>
 <p>see <a href="https://lede-project.org/docs/guide-developer/use-buildsystem">https://lede-project.org/docs/guide-developer/use-buildsystem</a></p>
-<li>now aready to compile fdi-lede package</li>
+<li>now aready to compile oss_openwrt_tiny_web</li>
 <pre>
 <strong># login as openwrt users</strong>
 cd ~/source/package/
-git clone https://github.com/friyadhibiermann/fdi-openwrt-lede.git
+git clone https://github.com/friyadhibiermann/oss_openwrt_tiny_web.git
 cd ~/source/
 make defconfig
 sed -i 's/# CONFIG_PACKAGE_fdi is not set/CONFIG_PACKAGE_fdi=y/g' .config
 make defconfig
-cd ~/source/ && make package/fdi-openwrt-lede/compile V=s
-find -L bin -name "*fdi*"
+cd ~/source/ && make package/oss_openwrt_tiny_web/compile V=s
+find -L bin -name "*oss*"
 <strong>#DONE</strong>
 </pre>
 </ul>
 <h3>NOTE:</h3><br>
-<strong>change value CFLAGS on ~/source/package/fdi-openwrt-lede/src/Makefile to your cpu type CFLAGS</stong>
+<strong>change value CFLAGS on ~/source/package/oss_openwrt_tiny_web/src/Makefile to your cpu type CFLAGS</stong>
