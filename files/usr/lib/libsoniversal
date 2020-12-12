@@ -463,7 +463,7 @@ waitForHost1()
     while [ $reachable -eq 0 ];
     do
 	i=$((i+1))
-    $PING -q -c 1 $1 > /dev/null 2>&1
+    ping -q -c 1 $1 > /dev/null 2>&1
     if [ $? -eq 0 ];
     then
         reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
@@ -497,16 +497,36 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
   	uci commit network
+zone_name=$(uci add firewall zone)
+uci batch << EOF
+        uci -q set firewall.$zone_name.network='wlan'
+	uci -q set firewall.$zone_name.output='ACCEPT'
+	uci -q set firewall.$zone_name.masq='1'
+	uci -q set firewall.$zone_name.mtu_fix='1'
+	uci -q set firewall.$zone_name.input='ACCEPT'
+	uci -q set firewall.$zone_name.forward='ACCEPT'
+        uci -q set firewall.$zone_name.network='wlan'
+EOF
 rule_name=$(uci add firewall rule)
 uci batch << EOF
-        uci -q set firewall.$rule_name.network=wlan
-	uci -q set firewall.$rule_name.output='ACCEPT'
-	uci -q set firewall.$rule_name.masq='1'
-	uci -q set firewall.$rule_name.mtu_fix='1'
-	uci -q set firewall.$rule_name.input='ACCEPT'
-	uci -q set firewall.$rule_name.forward='ACCEPT'
-        uci -q set firewall.$rule_name.network='wan wan6 wlan'
+	uci -q set firewall.$rule_name=rule
+	uci -q set firewall.$rule_name.name='Allow-DHCP-Renew'
+	uci -q set firewall.$rule_name.src='wlan'
+	uci -q set firewall.$rule_name.proto='udp'
+	uci -q set firewall.$rule_name.dest_port='68'
+	uci -q set firewall.$rule_name.target='ACCEPT'
+	uci -q set firewall.$rule_name.family='ipv4'
 EOF
+rule_name1=$(uci add firewall rule)
+uci batch << EOF
+	uci -q set firewall.$rule_name1=rule
+	uci -q set firewall.$rule_name1.name='Allow-Ping'
+	uci -q set firewall.$rule_name1.src='wlan'
+	uci -q set firewall.$rule_name1.proto='icmp'
+	uci -q set firewall.$rule_name1.icmp_type='echo-request'
+	uci -q set firewall.$rule_name1.family='ipv4'
+	uci -q set firewall.$rule_name1.target='ACCEPT'
+uci batch << EOF
         uci -q commit firewall > /dev/null 2>&1
         /etc/init.d/firewall restart > /dev/null 2>&1
 	/etc/init.d/dnsmasq restart > /dev/null 2>&1
