@@ -500,11 +500,11 @@ config_network(){
 }
 config_wireless(){
 		case $1 in
-			'web')
+			*)
 			read -p "SSID: " SSID
                         read -p "KEY: " KEY
 			;;
-			*)
+			'web')
 			SSID="$2"
 			KEY="$3"
 			;;
