@@ -445,7 +445,7 @@ exroot(){
 
 waitForHost()
 {
-reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9])
+reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9]| awk -F':' '{print $2}')
     if [ -n "$1" ];
     then
         waitForHost1 $1
@@ -470,6 +470,7 @@ waitForHost1()
     else
 		echo -n "▀"
 		sleep 1
+		wifi up
 		reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
     fi
 	wifi up
@@ -486,15 +487,29 @@ waitForHost1()
 config_network(){
         conf_dir="/etc/config"
         config="network"
+	uci -q set network.lan=interface
+	uci -q set network.lan.type='bridge'
+	uci -q set network.lan.ifname='eth0'
+	uci -q set network.lan.proto='static'
+	uci -q set network.lan.ipaddr='192.168.1.1'
+	uci -q set network.lan.netmask='255.255.255.0'
+	uci -q set network.lan.ip6assign='60'
         uci -q set network.wlan=interface
-        uci -q set network.wlan.netmask='255.255.255.0'
         uci -q set network.wlan.proto='dhcp'
-        uci commit network
-        uci -q set firewall.cfg04dc81.network=lan
-        uci -q set firewall.cfg06dc81.network='wan wan6 wlan'
+  	uci commit network
+rule_name=$(uci add firewall rule)
+uci batch << EOF
+        uci -q set firewall.$rule_name.network=wlan
+	uci -q set firewall.$rule_name.output='ACCEPT'
+	uci -q set firewall.$rule_name.masq='1'
+	uci -q set firewall.$rule_name.mtu_fix='1'
+	uci -q set firewall.$rule_name.input='ACCEPT'
+	uci -q set firewall.$rule_name.forward='ACCEPT'
+        uci -q set firewall.$rule_name.network='wan wan6 wlan'
+EOF
         uci -q commit firewall > /dev/null 2>&1
         /etc/init.d/firewall restart > /dev/null 2>&1
-		/etc/init.d/dnsmasq restart > /dev/null 2>&1
+	/etc/init.d/dnsmasq restart > /dev/null 2>&1
         waitForHost google.com
         /etc/init.d/network restart > /dev/null 2>&1
 }
