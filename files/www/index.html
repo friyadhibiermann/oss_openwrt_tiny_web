@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ONIVERSAL OSS</title>
+    <style type="text/css">
+      #loginContent { width: 350px; margin: 100px auto; }
+      button[type] { margin: 0.5em 0; }
+    </style>
+    <script src="js/jquery-1.8.0.min.js" type="text/javascript"></script>
+    <script src="jquery.redirect.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="css/my.css">
+  </head>
+  <body>
+    <div id="loginContent" class="">
+      <div id="loginResult" style="display:none;"></div>
+      <div id="loading-container" class="loading-container"></div>
+      <div class = "form_wrapper">
+      <form id="loginForm" name="loginForm" method="get" action="">
+        <fieldset>
+          <legend>OSS Login Page</legend>
+          <p>
+            <label for="username">Username</label>
+            <br />
+            <input type="text" id="username" name="username" class="text" size="20" />
+          </p>
+          <p>
+            <label for="password">Password</label>
+            <br />
+            <input type="password" id="password" name="password" class="text" size="20" />
+          </p>
+          <p>
+            <button id="login" type="submit" class="button vertical-center">
+		Login
+            </button>
+          </p>
+        </fieldset>
+	<div id="hash"></div>
+      </form>
+      </div>
+    </div>
+    <script src="js/login.js" type="text/javascript"></script>
+    <script src="js/loader.js" type="text/javascript"></script>
+  </body>
+</html>

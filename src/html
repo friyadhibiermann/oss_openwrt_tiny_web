@@ -1,5 +1,0 @@
-#!/bin/sh
-echo "Content-type: text/html"
-echo ""
-. oss
-oniversal web CV.ONIVERSAL [**password**]

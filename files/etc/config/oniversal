@@ -1,0 +1,6 @@
+
+config oss 'login'
+	option username 'oniversal'
+	option password 'admin'
+	option status '1'
+

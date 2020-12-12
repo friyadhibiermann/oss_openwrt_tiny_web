@@ -473,11 +473,11 @@ waitForHost1()
 		reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
     fi
 	wifi up
-	if [ $i == 10 ];then
+	if [ $i == 20 ];then
 		printf "\n"
 	fi
-	if [ $i == 20 ];then
-		printf "\ndevice restart\n lalu coba untuk internetan\n jika belum, maka ulangi langkahnya"
+	if [ $i == 25 ];then
+		printf "\ndevice restart\n lalu coba untuk internetan\n jika belum, maka ulangi langkahnya\n"
 		reboot
 	fi
     done
@@ -499,13 +499,16 @@ config_network(){
         /etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
-		if [ $1 != "web" ];then
+		case $1 in
+			'web')
 			read -p "SSID: " SSID
-			read -p "KEY: " KEY
-		elif [ $1 = "web" ];then
-			SSID=$1
-			KEY=$2
-		fi
+                        read -p "KEY: " KEY
+			;;
+			*)
+			SSID="$2"
+			KEY="$3"
+			;;
+		esac
         conf_dir="/etc/config"
         config="wireless"
         sed -i 's/default_radio0/ap/' $conf_dir/$config
@@ -527,8 +530,8 @@ config_wireless(){
 }
 
 help(){
-        echo "1.) fdi exroot"
-        echo "2.) fdi ap-sta wifi auto set"
+        echo "1.) oss exroot"
+        echo "2.) oss ap-sta wifi [auto]"
 }
 base_script(){
         rm /etc/config/wireless > /dev/null 2>&1
@@ -537,8 +540,7 @@ base_script(){
         uci set wireless.radio0.disabled='0'
         uci commit wireless
         wifi up
-		echo "tunggu 10 detik router sedang menyiapkan koneksi"
-		sleep 10
+	sleep 10
 		STAT="$(ifconfig | grep wlan0 | wc -l)"
 		while [ ${STAT} != 0 ];do
 			help
@@ -557,7 +559,7 @@ base_script(){
 							if [ $LIST -gt 0 ];then
 								echo "################"
 								printf "%s\n" "$SCAN"
-								echo "################"
+								echo "################"							
 								config_wireless
 							else
 							LIST=0
@@ -569,6 +571,12 @@ base_script(){
 		wifi up
 		done
 }
+
+scan_ssid(){
+SCAN=`iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//'`
+printf '%s<br>\n' "$SCAN"
+}
+
 get_post(){
      for qr in $QUERY_STRING
      do
@@ -579,18 +587,39 @@ get_post(){
      done
 }
 query_fix(){
-QUERY_STRING=$(echo $QUERY_STRING | sed 's/&/ /g')
-QUERY_STRING=$(echo $QUERY_STRING | sed 's/%3A/:/g')
+	QUERY_STRING=$(echo $QUERY_STRING | sed 's/&/ /g')
+	QUERY_STRING=$(echo $QUERY_STRING | sed 's/%3A/:/g')
+	QUERY_STRING=$(echo $QUERY_STRING | sed 's/%2B/+/g; s/%2F/\//g; s/%2C/,/g; s/%23/#/g; s/%21/!/g; s/%0D%0A/\n/g; s/%3D/=/g; s/%5B/[/g; s/%5D/]/g; s/%22/"/g; s/%24/$/g; s/%09/        /g; s/%60/\`/g; s/%7C/\|/g; s/%7B/\{/g; s/%7D/\}/g; s/%3E/\>/g; s/%28/(/g; s/%29/)/g; s/%27/'\''/g; s/%40/@/g; s/%3A/:/g' )
 }
+
+shell(){
+initialize $@
+[ "$StartRuler" == "1" ] && print_horizontal_ruler
+print_machine
+print_times
+print_loadavg
+print_disk
+print_memory
+print_swap
+print_wan
+print_lan
+print_wlan
+print_vpn
+print_extra
+[ "$EndRuler" == "1" ] && print_horizontal_ruler
+[ "$LastErrors" == "1" ] && print_error
+finalize
+}
+
 oniversal(){
+
 case $1 in
-        'web')
-        config_wireless $2 $3
-        ;;
-        *)
-        base_script
-        ;;
+	'web')
+	config_wireless $2 $3
+	;;
+	*)
+	base_script
+	;;
 esac
 }
-oniversal web "CV.ONIVERSAL" "fryzilliazaqhira01"
-oniversal
+
