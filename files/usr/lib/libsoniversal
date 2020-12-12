@@ -546,20 +546,19 @@ config_wireless(){
 		esac
         conf_dir="/etc/config"
         config="wireless"
-        sed -i 's/default_radio0/ap/' $conf_dir/$config
-        uci -q set wireless.ap.ssid='ONIVERSAL-OSS'
-        uci -q set wireless.ap.encryption='psk2'
-        uci -q set wireless.ap.key='admin'
+        DEFAULT=$(uci show wireless | grep lan | awk -F'.' '{print $2}')
+        uci -q set wireless.$DEFAULT.ssid='ONIVERSAL-OSS'
+        uci -q set wireless.$DEFAULT.encryption='psk2'
+        uci -q set wireless.$DEFAULT.key='admin'
         uci commit wireless
         if [ "$SSID" != "" -o "$KEY" != "" ];then
-                uci -q set wireless.sta='wifi-iface'
-                uci -q set wireless.sta.network='wlan'
-                uci -q set wireless.sta.encryption='psk2'
-                uci -q set wireless.sta.device='radio0'
-                uci -q set wireless.sta.mode='sta'
-                uci -q set wireless.sta.key="$KEY"
-                uci -q set wireless.sta.ssid="$SSID"
-                uci commit wireless
+		uci -q set wireless.repearer_radio0=wifi-iface
+		uci -q set wireless.repearer_radio0.device='radio0'
+		uci -q set wireless.repearer_radio0.network='wlan'
+		uci -q set wireless.repearer_radio0.ssid="$SSID"
+		uci -q set wireless.repearer_radio0.encryption='psk2'
+		uci -q set wireless.repearer_radio0.mode='sta'
+		uci -q set wireless.repearer_radio0.key="$KEY"
                 config_network
         fi
 }
