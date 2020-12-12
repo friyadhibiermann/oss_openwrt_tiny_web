@@ -82,7 +82,7 @@ echo "<input style='background-color: #7d0000;' type='submit' id='submit' name='
 echo "<input placeholder='input script here' style='width: 50%;background-color: #0a0a0a;color:green;border:none;' type='text' name='command' class='text'>"
 echo "<input style='background-color: #7d0000;' type="submit" name='send' value='send'>"
 echo "</form>"
-echo "<div class='pre-scrollable' style='margin-top:-5%;'>"
+echo "<div class='pre-scrollable' style='margin-top:5px;'>"
 echo "<pre>$RES_SCAN</pre>"
 echo "</div>"
 echo "</div>"
