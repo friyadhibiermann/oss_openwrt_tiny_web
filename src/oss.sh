@@ -73,7 +73,7 @@ return false;
 </head>
 <body>
 "
-echo "<div style='margin-top:-21%;margin-left:0%;'>"
+echo "<div style='margin:-250px;margin-left:0%;'>"
 echo "<form method='get'>"
 echo "<input type='hidden' name='gui' value='yes'></input>"
 echo "<input placeholder='input ssid here' style='width: 50%;background-color: #0a0a0a;color:#4a4646;border:none;' type='text' id='ssid' name='ssid' value='$SSID'></input>"
