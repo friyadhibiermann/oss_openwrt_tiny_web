@@ -559,7 +559,8 @@ base_script(){
 							if [ $LIST -gt 0 ];then
 								echo "################"
 								printf "%s\n" "$SCAN"
-								echo "################"							
+								echo "################"	
+								LIST=$(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//' | wc -l)
 								config_wireless
 							else
 							LIST=0
