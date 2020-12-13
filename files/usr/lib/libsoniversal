@@ -386,7 +386,7 @@ help(){
         echo "2.) oss ap-sta wifi [auto]"
 }
 base_script(){
-        if [ -z /etc/config/wireless ] && [ $(cat /etc/config/wireless | grep repearter | wc -l) -ge 1 ];then
+        if [ -z /etc/config/wireless ] && [ $(cat /etc/config/wireless | grep repearter | wc -l) == 0 ];then
                 rm /etc/config/wireless > /dev/null 2>&1
                 wifi config
         fi
