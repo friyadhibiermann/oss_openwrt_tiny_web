@@ -349,29 +349,26 @@ waitForHost1()
 }
 config_network(){
         conf_dir="/etc/config"
-        config="network"
-	uci -q set network.lan=interface
-	uci -q set network.lan.type='bridge'
-	uci -q set network.lan.ifname='eth0'
-	uci -q set network.lan.proto='static'
-	uci -q set network.lan.ipaddr='192.168.1.1'
-	uci -q set network.lan.netmask='255.255.255.0'
 	uci -q set network.lan.ip6assign='60'
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
   	uci commit network
-        uci -q set firewall.cfg11dc81.network='wlan'
-	uci -q set firewall.cfg11dc81.output='ACCEPT'
-	uci -q set firewall.cfg11dc81.masq='1'
-	uci -q set firewall.cfg11dc81.mtu_fix='1'
-	uci -q set firewall.cfg11dc81.input='ACCEPT'
-	uci -q set firewall.cfg11dc81.forward='ACCEPT'
-        uci -q set firewall.cfg11dc81.network='wan wan6 lan'
-        uci -q commit firewall > /dev/null 2>&1
-        /etc/init.d/firewall restart > /dev/null 2>&1
-	/etc/init.d/dnsmasq restart > /dev/null 2>&1
-        waitForHost google.com
-        /etc/init.d/network restart > /dev/null 2>&1
+	if [ `uci get firewall.@zone[1].network | wc -l` -gt 0 ];
+		uci add uci add firewall zone | while read line;do
+		uci -q set firewall.$line.network='wlan'
+		uci -q set firewall.$line.output='ACCEPT'
+		uci -q set firewall.$line.masq='1'
+		uci -q set firewall.$line1.mtu_fix='1'
+		uci -q set firewall.$line.input='ACCEPT'
+		uci -q set firewall.$line.forward='ACCEPT'
+		uci -q set firewall.$line.network='wan wan6 lan'
+		done
+		uci -q commit firewall > /dev/null 2>&1
+		/etc/init.d/firewall restart > /dev/null 2>&1
+		/etc/init.d/dnsmasq restart > /dev/null 2>&1
+		waitForHost google.com
+		/etc/init.d/network restart > /dev/null 2>&1
+	fi
 }
 config_wireless(){
 		case $1 in
