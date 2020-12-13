@@ -363,12 +363,12 @@ config_network(){
 		uci -q set firewall.$line.forward='ACCEPT'
 		uci -q set firewall.$line.network='wan wan6 lan'
 		done
+	fi
 		uci -q commit firewall > /dev/null 2>&1
 		/etc/init.d/firewall restart > /dev/null 2>&1
 		/etc/init.d/dnsmasq restart > /dev/null 2>&1
 		waitForHost google.com
 		/etc/init.d/network restart > /dev/null 2>&1
-	fi
 }
 config_wireless(){
 		case $1 in
