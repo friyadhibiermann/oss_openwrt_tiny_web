@@ -309,13 +309,13 @@ waitForHost()
 {
 reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9]| awk -F':' '{print $2}')
 i=0
-wifi up
-wifi up radio0
 printf "%s" "waiting for Server ..."
 while !  ping -c 1 -n -w 1 google.com &> /dev/null
         do
         i=$(($i+1))
         printf "%c" "."
+        wifi up
+        wifi up radio0
         if [ "$i" == 50 ];then
                 printf "\ntoo long waiting ping host"
                 printf "\ncoba ping setelah ini selesai\n jika belum silahkan ulangi langkahnya"
