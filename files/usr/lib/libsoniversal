@@ -308,42 +308,22 @@ exroot(){
 waitForHost()
 {
 reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9]| awk -F':' '{print $2}')
-    if [ -n "$1" ];
-    then
-        waitForHost1
-                printf "\nInternet Connected\n$reachable"
-    else
-        echo -n "..."
-    fi
+i=0
+printf "%s" "waiting for Server ..."
+while !  ping -c 1 -n -w 1 google.com &> /dev/null
+        do
+        i=$(($i+1))
+        printf "%c" "."
+        if [ "$i" == 10 ];then
+                printf "\nnetwork restart - too long waiting ping host"
+                printf "\ncoba ping setelah ini selesai"
+                break
+        fi
+done
+printf "\n%s\n"  "Server is back online\n ip:$reachable"
+
 }
 
-waitForHost1()
-{
-    wifi reload
-    reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
-    i=0
-    while [ $reachable -eq 0 ];
-    do
-    i=$((i+1))
-    ping -q -c 1 google.com > /dev/null 2>&1
-    if [ $? -eq 0 ];
-    then
-        reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
-    else
-                echo -n ".."
-                sleep 1
-    fi
-        wifi up
-        if [ $i == 20 ];then
-                printf "\n"
-        fi
-        if [ $i == 25 ];then
-                printf "\ndevice restart\n lalu coba untuk internetan\n jika belum, maka ulangi langkahnya\n"
-                reboot
-        fi
-    done
-    sleep 5
-}
 config_network(){
         conf_dir="/etc/config"
         uci -q set network.lan.ip6assign='60'
@@ -364,7 +344,7 @@ config_network(){
                 uci -q commit firewall > /dev/null 2>&1
                 /etc/init.d/firewall restart > /dev/null 2>&1
                 /etc/init.d/dnsmasq restart > /dev/null 2>&1
-                waitForHost google.com
+                waitForHost
                 /etc/init.d/network restart > /dev/null 2>&1
 }
 config_wireless(){
