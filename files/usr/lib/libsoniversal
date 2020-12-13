@@ -332,7 +332,7 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
         uci commit network
-        if [ `uci get firewall.@zone[1].network | wc -l` == 0 ];then
+        if [ `uci get firewall.@zone[1].network=wlan | wc -l` == 0 ];then
                 uci -q add firewall zone | while read line;do
                 uci -q set firewall.$line.network='wlan'
                 uci -q set firewall.$line.output='ACCEPT'
