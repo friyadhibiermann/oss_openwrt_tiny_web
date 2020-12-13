@@ -310,22 +310,20 @@ waitForHost()
 reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9]| awk -F':' '{print $2}')
 i=0
 printf "%s" "waiting for Server ..."
-PING=$(ping -c 1 google.com | grep "packet loss" | grep -o '[0-9]\+%')
-
-while [ "$PING" != '0%' ];do
+PING=$(ping -c 1 google.com | grep "packet loss" | grep -o '[0-9]\+%'  )
+echo $PING | while read line;do
         i=$(($i+1))
         printf "%c" "."
-        PING=$(ping -c 1 google.com | grep "packet loss" | grep -o '[0-9]\+%')PING=$(ping -c 1 google.com | grep "packet loss" | grep -o '[0-9]\+%')
         if [ "$i" == $1 ];then
                 printf "\ntoo long waiting ping host"
                 printf "\ncoba ping setelah ini selesai\n jika belum silahkan ulangi langkahnya"
                 break
         fi
+        if [ $line -ge "0%" ];then
+                printf "\nServer is back online\n ip:$reachable"
+                break
+        fi
 done
-if [ $(echo $reachable | wc -l ) -ge 1 ];then
-        printf "\nServer is back online\n ip:$reachable"
-        break
-fi
 
 }
 
