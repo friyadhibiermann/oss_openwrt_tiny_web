@@ -393,13 +393,11 @@ help(){
         echo "2.) oss ap-sta wifi [auto]"
 }
 base_script(){
-        if [ -z /etc/config/wireless ] || [ $(cat /etc/config/wireless | grep repearter | wc -l) == 0 ];then
-                rm /etc/config/wireless > /dev/null 2>&1
-                wifi config
-                uci commit wireless
-        fi
-        sleep 5
+        rm /etc/config/wireless > /dev/null 2>&1
+        wifi config
+        uci commit wireless
         uci set wireless.radio0.disabled='0'
+        sleep 5
         uci commit wireless
         wifi up
         wifi up radio0
