@@ -90,7 +90,7 @@ echo "
 </body>
 </html>
 "
-elif [ $method = 'GET' ] && [ $(get_post auth) == 'json' ] && [ $(get_post gui) != 'yes' ];then
+elif [ $method = 'GET' ] && [ $(get_post auth) == 'json' ] || [ $(get_post gui) != 'yes' ];then
 content_html
 	if [ $DB_USER == $USER ] && [ $DB_PASS == $PASS ];then
 		uci set oniversal.login.status='1'
