@@ -322,17 +322,20 @@ while !  ping -c 1 -n -w 1 google.com &> /dev/null
 done
 if [ $(echo $reachable | wc -l ) -ge 1 ];then
         printf "\nServer is back online\n ip:$reachable"
+        break
 fi
 
 }
 
 config_network(){
         conf_dir="/etc/config"
+        echo "setting network"
         uci -q set network.lan.ip6assign='60'
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
         uci commit network
         if [ `uci get firewall.@zone[1].network=wlan | wc -l` == 0 ];then
+        echo "setting firewall"
                 uci -q add firewall zone | while read line;do
                 uci -q set firewall.$line.network='wlan'
                 uci -q set firewall.$line.output='ACCEPT'
@@ -345,7 +348,9 @@ config_network(){
         fi
                 uci -q commit firewall > /dev/null 2>&1
                 /etc/init.d/firewall restart > /dev/null 2>&1
+                echo "restart firewall"
                 /etc/init.d/dnsmasq restart > /dev/null 2>&1
+                echo "restart dnsmasq"
                 waitForHost 20
 }
 config_wireless(){
@@ -365,7 +370,9 @@ config_wireless(){
         uci -q set wireless.$DEFAULT.ssid='ONIVERSAL-OSS'
         uci -q set wireless.$DEFAULT.encryption='psk2'
         uci -q set wireless.$DEFAULT.key='admin'
+        echo "seting access point"
         if [ "$SSID" != "" -o "$KEY" != "" ];then
+                echo "setting wifi repearter"
                 uci -q set wireless.repearer_radio0=wifi-iface
                 uci -q set wireless.repearer_radio0.device='radio0'
                 uci -q set wireless.repearer_radio0.network='wlan'
@@ -420,6 +427,7 @@ base_script(){
                                                                 config_wireless
                                                         else
                                                         LIST=0
+                                                        echo "ulangi lagi"
                                                         fi
                                                 done
                 ;;
