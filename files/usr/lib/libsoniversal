@@ -321,7 +321,7 @@ while !  ping -c 1 -n -w 1 google.com &> /dev/null
         fi
 done
 if [ $(echo $reachable | wc -l ) -ge 1 ];then
-        printf "Server is back online\n ip:$reachable"
+        printf "\nServer is back online\n ip:$reachable"
 fi
 
 }
@@ -347,7 +347,6 @@ config_network(){
                 /etc/init.d/firewall restart > /dev/null 2>&1
                 /etc/init.d/dnsmasq restart > /dev/null 2>&1
                 waitForHost 20
-                /etc/init.d/network restart
 }
 config_wireless(){
                 case $1 in
