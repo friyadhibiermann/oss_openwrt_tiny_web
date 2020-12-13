@@ -360,14 +360,13 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
   	uci commit network
-	zone_name=$(uci add firewall zone)
-        uci -q set firewall.$zone_name.network='wlan'
-	uci -q set firewall.$zone_name.output='ACCEPT'
-	uci -q set firewall.$zone_name.masq='1'
-	uci -q set firewall.$zone_name.mtu_fix='1'
-	uci -q set firewall.$zone_name.input='ACCEPT'
-	uci -q set firewall.$zone_name.forward='ACCEPT'
-        uci -q set firewall.$zone_name.network='wlan'
+        uci -q set firewall.cfg11dc81.network='wlan'
+	uci -q set firewall.cfg11dc81.output='ACCEPT'
+	uci -q set firewall.cfg11dc81.masq='1'
+	uci -q set firewall.cfg11dc81.mtu_fix='1'
+	uci -q set firewall.cfg11dc81.input='ACCEPT'
+	uci -q set firewall.cfg11dc81.forward='ACCEPT'
+        uci -q set firewall.cfg11dc81.network='wan wan6 lan'
         uci -q commit firewall > /dev/null 2>&1
         /etc/init.d/firewall restart > /dev/null 2>&1
 	/etc/init.d/dnsmasq restart > /dev/null 2>&1
