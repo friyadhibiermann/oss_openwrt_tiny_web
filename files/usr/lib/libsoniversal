@@ -320,7 +320,7 @@ while !  ping -c 1 -n -w 1 google.com &> /dev/null
                 break
         fi
 done
-printf "\n%s\n"  "Server is back online\n ip:$reachable"
+printf "Server is back online\n ip:$reachable"
 
 }
 
