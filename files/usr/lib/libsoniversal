@@ -307,24 +307,57 @@ exroot(){
 
 waitForHost()
 {
-reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9]| awk -F':' '{print $2}')
+echo "Testing..."
 i=0
-printf "%s" "waiting for Server ..."
-PING=$(ping -c 1 google.com | grep "packet loss" | grep -o '[0-9]\+%'  )
-echo $PING | while read line;do
-        i=$(($i+1))
-        printf "%c" "."
-        if [ "$i" == $1 ];then
-                printf "\ntoo long waiting ping host"
-                printf "\ncoba ping setelah ini selesai\n jika belum silahkan ulangi langkahnya"
-                break
-        fi
-        if [ $line -ge "0%" ];then
-                printf "\nServer is back online\n ip:$reachable"
-                break
-        fi
-done
+PING_CMD="ping -t 3 -c 1 google.com > /dev/null 2>&1"
 
+eval $PING_CMD
+
+if [[ $? -eq 0 ]]; then
+    echo "Already connected."
+else
+    echo -n "Waiting for connection..."
+
+    while true; do
+        i=$(($i+1))
+        eval $PING_CMD
+        wifi up radio0
+        if [[ $? -eq 0 ]]; then
+            echo
+            echo Connected.
+            break
+        else
+            sleep 1
+            echo -n .
+            if [ $i == 10 ];then
+                echo "conection time out, please restart"
+                read -p "are you want to restart automatically? :" ans
+                case $ans in
+                        'yes')
+                        reboot
+                        ;;
+                        'no')
+                        read -p "are you want to restart network connection ? : " ans2
+                        case $ans2 in
+                                'yes')
+                                /etc/init.d/network restart
+                                ;;
+                                'no')
+                                break
+                                ;;
+                                *)
+                                break
+                                ;;
+                        esac
+                        ;;
+                        *)
+                        break
+                        ;;
+                esac
+            fi
+        fi
+    done
+fi
 }
 
 config_network(){
@@ -351,7 +384,8 @@ config_network(){
                 echo "restart firewall"
                 /etc/init.d/dnsmasq restart > /dev/null 2>&1
                 echo "restart dnsmasq"
-                waitForHost 20
+                waitForHost 10
+                exit 0
 }
 config_wireless(){
                 case $1 in
@@ -396,8 +430,8 @@ base_script(){
         rm /etc/config/wireless > /dev/null 2>&1
         wifi config
         uci commit wireless
-        uci set wireless.radio0.disabled='0'
         sleep 5
+        uci set wireless.radio0.disabled='0'
         uci commit wireless
         wifi up
         wifi up radio0
