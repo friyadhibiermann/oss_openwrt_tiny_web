@@ -392,6 +392,7 @@ base_script(){
         uci set wireless.radio0.disabled='0'
         uci commit wireless
         wifi up
+        wifi up radio0
         sleep 10
                 STAT="$(ifconfig | grep wlan0 | wc -l)"
                 while [ ${STAT} != 0 ];do
