@@ -388,8 +388,6 @@ help(){
 base_script(){
         rm /etc/config/wireless > /dev/null 2>&1
         wifi config
-        sleep 2
-        wifi down radio0
         sleep 5
         uci set wireless.radio0.disabled='0'
         uci commit wireless
