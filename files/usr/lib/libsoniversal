@@ -329,6 +329,7 @@ waitForHost1()
     if [ $? -eq 0 ];
     then
         reachable=$(ifconfig | awk '/wlan0/,/inet/' | grep inet | awk -F' ' '{print $2}' | grep [0-9] | wc -l)
+	break
     else
 		echo -n "▀"
 		sleep 1
