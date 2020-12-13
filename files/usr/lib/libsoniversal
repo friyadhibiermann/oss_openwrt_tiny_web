@@ -320,8 +320,6 @@ while !  ping -c 1 -n -w 1 google.com &> /dev/null
                 break
         fi
 done
-wifi up
-wifi up radio0
 if [ $(echo $reachable | wc -l ) -ge 1 ];then
         printf "Server is back online\n ip:$reachable"
 fi
@@ -379,6 +377,8 @@ config_wireless(){
 
         fi
         uci commit wireless
+        wifi up
+        wifi up radio0
         config_network
 }
 
@@ -387,9 +387,10 @@ help(){
         echo "2.) oss ap-sta wifi [auto]"
 }
 base_script(){
-        if [ -z /etc/config/wireless ] && [ $(cat /etc/config/wireless | grep repearter | wc -l) == 0 ];then
+        if [ -z /etc/config/wireless ] || [ $(cat /etc/config/wireless | grep repearter | wc -l) == 0 ];then
                 rm /etc/config/wireless > /dev/null 2>&1
                 wifi config
+                uci commit wireless
         fi
         sleep 5
         uci set wireless.radio0.disabled='0'
