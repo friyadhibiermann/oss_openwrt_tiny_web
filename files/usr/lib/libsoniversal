@@ -437,9 +437,7 @@ get_post(){
      done
 }
 query_fix(){
-        QUERY_STRING=$(echo $QUERY_STRING | sed 's/&/ /g')
-        QUERY_STRING=$(echo $QUERY_STRING | sed 's/%3A/:/g')
-        QUERY_STRING=$(echo $QUERY_STRING | sed 's/%2B/+/g; s/%2F/\//g; s/%2C/,/g; s/%23/#/g; s/%21/!/g; s/%0D%0A/\n/g; s/%3D/=/g; s/%5B/[/g; s/%5D/]/g; s/%22/"/g; s/%24/$/g; s/%09/        /g; s/%60/\`/g; s/%7C/\|/g; s/%7B/\{/g; s/%7D/\}/g; s/%3E/\>/g; s/%28/(/g; s/%29/)/g; s/%27/'\''/g; s/%40/@/g; s/%3A/:/g' )
+        QUERY_STRING=$(echo $QUERY_STRING | sed 's/%2B/+/g;s/%3A/:/g;s/&/ /g;s/%2F/\//g; s/%2C/,/g; s/%23/#/g; s/%21/!/g; s/%0D%0A/\n/g; s/%3D/=/g; s/%5B/[/g; s/%5D/]/g; s/%22/"/g; s/%24/$/g; s/%09/        /g; s/%60/\`/g; s/%7C/\|/g; s/%7B/\{/g; s/%7D/\}/g; s/%3E/\>/g; s/%28/(/g; s/%29/)/g; s/%27/'\''/g; s/%40/@/g; s/%3A/:/g' )
 }
 
 shell(){
