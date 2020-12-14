@@ -365,6 +365,7 @@ config_network(){
                                 break
                         done
                 fi
+                break
                 done
 uci -q commit firewall > /dev/null 2>&1
 /etc/init.d/firewall restart > /dev/null 2>&1
