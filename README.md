@@ -2,14 +2,14 @@
 jangan lupa compile membutuhkan SHC untuk encrypt script oss
 <ul>
   <li></li>
-  <img></img>
+  <img src="Capture.PNG"></img>
   <li></li>
-  <img></img>
+  <img src="Capture.1.PNG"></img>
   <li></li>
-  <img></img>
+  <img src="Capture2.PNG"></img>
   <li></li>
-  <img></img>
+  <img src="Capture3.PNG"></img>
   <li></li>
-  <img></img>
+  <img src="Capture4.PNG"></img>
 </ul>
   
