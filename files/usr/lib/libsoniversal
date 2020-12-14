@@ -358,6 +358,7 @@ while true;do
         else
                 echo "setting firewall"
                 uci -q add firewall zone | while read line;do
+                uci -q set firewall.$line.name='wlan'
                 uci -q set firewall.$line.output='ACCEPT'
                 uci -q set firewall.$line.masq='1'
                 uci -q set firewall.$line1.mtu_fix='1'
