@@ -358,13 +358,12 @@ while true;do
         else
                 echo "setting firewall"
                 uci -q add firewall zone | while read line;do
-                uci -q set firewall.$line.network='wlan'
                 uci -q set firewall.$line.output='ACCEPT'
                 uci -q set firewall.$line.masq='1'
                 uci -q set firewall.$line1.mtu_fix='1'
                 uci -q set firewall.$line.input='ACCEPT'
                 uci -q set firewall.$line.forward='ACCEPT'
-                uci -q set firewall.$line.network='wan wan6 lan'
+                uci -q set firewall.$line.network='wlan wan6 lan'
                 done
         fi
 done
@@ -396,7 +395,7 @@ config_wireless(){
         echo "seting access point"
         if [ "$SSID" != "" -o "$KEY" != "" ];then
                 echo "setting wifi repearter"
-                uci -q set wireless.repearer_radio0=wifi-iface
+                uci -q add_list wireless.repearer_radio0=wifi-iface
                 uci -q set wireless.repearer_radio0.device='radio0'
                 uci -q set wireless.repearer_radio0.network='wlan'
                 uci -q set wireless.repearer_radio0.ssid="$SSID"
