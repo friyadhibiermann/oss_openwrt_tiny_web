@@ -351,22 +351,18 @@ config_network(){
         uci -q set network.wlan.proto='dhcp'
         uci commit network
                 echo "setting firewall"
-                N_ZONE=$(uci show firewall | grep zone | grep name | wc -l)
-                for N in `seq 0 $N_ZONE`;do
-                if [ $(uci get firewall.[$N].name='wlan' | wc -l) != 1 ];then
-                        uci add firewall zone | while read line;do
-                                uci -q set firewall.$line.name='wlan'
-                                uci -q set firewall.$line.output='ACCEPT'
-                                uci -q set firewall.$line.masq='1'
-                                uci -q set firewall.$line.mtu_fix='1'
-                                uci -q set firewall.$line.input='ACCEPT'
-                                uci -q set firewall.$line.forward='ACCEPT'
-                                uci -q set firewall.$line.network='wlan wan lan'
-                                break
-                        done
-                fi
-                break
-                done
+if [ $(uci get firewall.@zone[-1].name) != 'wlan' ];then
+uci batch << EOF
+add firewall zone
+set firewall.@zone[-1].name='wlan'
+set firewall.@zone[-1].network='wlan wan lan'
+set firewall.@zone[-1].output='ACCEPT'
+set firewall.@zone[-1].input='REJECT'
+set firewall.@zone[-1].forward='ACCEPT'
+EOF
+else
+echo "firewall wlan sudah ada"
+fi
 uci -q commit firewall > /dev/null 2>&1
 /etc/init.d/firewall restart > /dev/null 2>&1
 echo "restart firewall"
