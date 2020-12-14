@@ -6,7 +6,7 @@ initialize() {
                 StartRuler=""
                 EndRuler="1"
         fi
-        [ -e /etc/banner ] && Width=$(awk 'BEGIN{max=0}{if(length($0)>max)max=length($0)}END{print max}' /etc/banner 2>/dev/null)
+        [ -e /etc/web.banner ] && Width=$(awk 'BEGIN{max=0}{if(length($0)>max)max=length($0)}END{print max}' /etc/banner 2>/dev/null)
         while [ -n "$1" ]; do
                 case "$1" in
                 -h|--help)      echo -e "Usage: $0 [-h|--help] [[-m|--mono]|[-bw|-black-white]|[-c2|--color-2]] [-sr|--no-start-ruler] [-er|--no-end-ruler]"\
@@ -70,37 +70,15 @@ initialize() {
                         ErrorColor="</font><font class=\"Error\">";;
                 *)      ;;
         esac
-        ([ "$Width" == "" ] || [ "$Width" -lt 65 ]) && Width=65
+        ([ "$Width" == "" ] || [ "$Width" -lt 50 ]) && Width=50
         if [ "$HTML" == "1" ]; then
-                echo "Content-type: text/html"
-                echo ""
-                cat << EOF
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
-        <head>
-                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        </head>
-        <style>
-                body {font-family:Consolas,Terminal,"Lucida Console",Courier,Monaco,monospace;
-                        font-size:1em;white-space:pre-wrap;word-wrap:break-word;line-height:1.2em;
-                        color:#bbbbbb;background-color:#000000}
-                .Normal {color:#bbbbbb}
-                .Machine  {color:#bbbb00}
-                .Value {color:#00ffff}
-                .Addr {color:#ee5555}
-                .RXTX {color:#00bb00}
-        </style>
-        <body>
-EOF
-                [ -e /etc/banner ] && cat /etc/banner
+        [ -e /etc/web.banner ] && cat /etc/web.banner
         fi
 }
-
 finalize() {
         if [ "$HTML" == "1" ]; then
                 cat << EOF
-        </body>
-</html>
+        </div>
 EOF
         fi
 }
@@ -307,6 +285,7 @@ exroot(){
 
 waitForHost()
 {
+IPADDRESS=$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
 echo "Testing..."
 i=0
 PING_CMD="ping -t 3 -c 1 google.com > /dev/null 2>&1"
@@ -320,11 +299,12 @@ else
 
     while true; do
         i=$(($i+1))
-        eval $PING_CMD
         wifi up radio0
+        eval $PING_CMD
         if [[ $? -eq 0 ]]; then
             echo
             echo Connected.
+            printf "Ip Address: $IPADDRESS\SSID: $scan_ssid"
             break
         else
             sleep 1
@@ -367,8 +347,16 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
         uci commit network
-        if [ `uci get firewall.@zone[1].network=wlan | wc -l` == 0 ];then
-        echo "setting firewall"
+i=0
+while true;do
+        i=$(($i+1))
+        WLAN=$(uci get firewall.@zone[$i].name)
+        sleep 1
+        if [ $WLAN == 'wlan' ];then
+                echo $WLAN
+                break
+        else
+                echo "setting firewall"
                 uci -q add firewall zone | while read line;do
                 uci -q set firewall.$line.network='wlan'
                 uci -q set firewall.$line.output='ACCEPT'
@@ -379,13 +367,14 @@ config_network(){
                 uci -q set firewall.$line.network='wan wan6 lan'
                 done
         fi
-                uci -q commit firewall > /dev/null 2>&1
-                /etc/init.d/firewall restart > /dev/null 2>&1
-                echo "restart firewall"
-                /etc/init.d/dnsmasq restart > /dev/null 2>&1
-                echo "restart dnsmasq"
-                waitForHost 10
-                exit 0
+done
+uci -q commit firewall > /dev/null 2>&1
+/etc/init.d/firewall restart > /dev/null 2>&1
+echo "restart firewall"
+/etc/init.d/dnsmasq restart > /dev/null 2>&1
+echo "restart dnsmasq"
+waitForHost 10
+exit 0
 }
 config_wireless(){
                 case $1 in
@@ -426,7 +415,22 @@ help(){
         echo "1.) oss exroot"
         echo "2.) oss ap-sta wifi [auto]"
 }
+ping_test(){
+IPADDRESS=$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
+IP='google.com'
+ping -c1 $IP > /dev/null  2>&1
+if [ "$?" = 0 ]
+then
+  echo "internet connected"
+  echo "SSID: $(scan_ssid)"
+  echo "ipaddress: $IPADDRESS"
+  exit 0
+else
+  echo "Host not found"
+fi
+}
 base_script(){
+        ping_test
         rm /etc/config/wireless > /dev/null 2>&1
         wifi config
         uci commit wireless
@@ -456,7 +460,14 @@ base_script(){
                                                                 printf "%s\n" "$SCAN"
                                                                 echo "################"
                                                                 LIST=$(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//' | wc -l)
-                                                                config_wireless
+                                                                case $1 in
+                                                                        'web')
+                                                                                config_wireless web $2 $3
+                                                                        ;;
+                                                                        *)
+                                                                                config_wireless
+                                                                        ;;
+                                                                esac
                                                         else
                                                         LIST=0
                                                         echo "ulangi lagi"
@@ -484,12 +495,12 @@ get_post(){
      done
 }
 query_fix(){
-        QUERY_STRING=$(echo $QUERY_STRING | sed 's/%2B/+/g;s/%3A/:/g;s/&/ /g;s/%2F/\//g; s/%2C/,/g; s/%23/#/g; s/%21/!/g; s/%0D%0A/\n/g; s/%3D/=/g; s/%5B/[/g; s/%5D/]/g; s/%22/"/g; s/%24/$/g; s/%09/        /g; s/%60/\`/g; s/%7C/\|/g; s/%7B/\{/g; s/%7D/\}/g; s/%3E/\>/g; s/%28/(/g; s/%29/)/g; s/%27/'\''/g; s/%40/@/g; s/%3A/:/g' )
+        QUERY_STRING=$(echo $QUERY_STRING | sed 's/%3A/:/g;s/&/ /g;s/%2F/\//g; s/%2C/,/g; s/%23/#/g; s/%21/!/g; s/%0D%0A/\n/g; s/%3D/=/g; s/%5B/[/g; s/%5D/]/g; s/%22/"/g; s/%24/$/g; s/%09/        /g; s/%60/\`/g; s/%7C/\|/g; s/%7B/\{/g; s/%7D/\}/g; s/%3E/\>/g; s/%28/(/g; s/%29/)/g; s/%27/'\''/g; s/%40/@/g; s/%3A/:/g' )
 }
 
 shell(){
 initialize $@
-[ "$StartRuler" == "1" ] && print_horizontal_ruler
+[ "$StartRuler" == "1" ]
 print_machine
 print_times
 print_loadavg
@@ -499,19 +510,168 @@ print_swap
 print_wlan
 print_vpn
 print_extra
-[ "$EndRuler" == "1" ] && print_horizontal_ruler
-[ "$LastErrors" == "1" ] && print_error
-finalize
+[ "$EndRuler" == "0" ]
+[ "$LastErrors" == "1" ]
+echo "  --------------------------------------------------------"
 }
 
 oniversal(){
 
 case $1 in
         'web')
-        config_wireless $2 $3
+        base_script $2 $3
         ;;
         *)
         base_script
         ;;
 esac
+}
+head(){
+cat << EOF
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+        <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+EOF
+echo "
+<link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
+<style type='text/css'>
+ body {font-family:Consolas,Terminal,"Lucida Console",Courier,Monaco,monospace;
+                        font-size:1em;white-space:pre-wrap;word-wrap:break-word;line-height:1.2em;
+                        color:#bbbbbb;background-color:#000000}
+                .Normal {color:#bbbbbb}
+                .Machine  {color:#bbbb00}
+                .Value {color:#00ffff}
+                .Addr {color:#ee5555}
+                .RXTX {color:#00bb00} body {font-family:Consolas,Terminal,"Lucida Console",Courier,Monaco,monospace;
+                        font-size:1em;white-space:pre-wrap;word-wrap:break-word;line-height:1.2em;
+                        color:#bbbbbb;background-color:#000000}
+                .Normal {color:#bbbbbb}
+                .Machine  {color:#bbbb00}
+                .Value {color:#00ffff}
+                .Addr {color:#ee5555}
+                .RXTX {color:#00bb00}
+.text {
+font: italic small-caps bold 12px/16px Georgia, serif;
+color:white;
+text-align: left;
+}
+.pre-scrollable {
+    max-height: 340px;
+    overflow-y: scroll;
+    /* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+form{
+width: 50%;
+background-color: #0a0a0a;
+color:#4a4646;border:none;
+}
+.form-group {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.transparent-input {
+        background-color: rgba(0, 0, 0, 0);
+        border: none;
+}
+</style>
+<script>
+return false;
+</script>
+</head>
+<body style='background-color:black;'>
+"
+}
+
+footer(){
+cat << EOF
+</body>
+</html>
+EOF
+}
+
+result(){
+if [ "$(get_post scan)" == 'scan-wifi' ];then
+        RES_SCAN=$(scan_ssid)
+fi
+if [ "$(get_post send)" == 'send' ];then
+        CMD=$(get_post command)
+        echo "#!/bin/sh" > /tmp/script.sh
+        echo "$CMD" >> /tmp/script.sh
+        sh /tmp/script.sh > /tmp/output.log
+        RES_SCAN=`cat /tmp/output.log`
+        echo "" > /tmp/output.log
+fi
+cat <<EOF
+<div class="mt-n5 px-md-5" role="group">
+<div class='pre-scrollable'>
+<pre style="color:#048012;">$RES_SCAN</pre>
+</div>
+</div>
+EOF
+}
+
+wifi_setting(){
+cat <<EOF
+<div class="row px-md-4">
+        <form method='get'>
+                <div class="input-group row px-md-4">
+                <input type='hidden' name='gui' value='yes'></input>
+                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
+                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
+                <input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
+                </div>
+        </form>
+</div>
+EOF
+}
+
+shell_gui(){
+cat <<EOF
+<div class="row px-md-4">
+<form id="web_shell" method='get'>
+        <div class="input-group row px-md-4">
+                <input type='hidden' name='gui' value='yes'></input>
+                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
+                <input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
+        </div>
+</form>
+</div>
+EOF
+}
+content_html(){
+echo "Content-type: text/html"
+echo ""
+}
+first_view(){
+cat <<EOF
+<form method="get" action="">
+<div class="btn-group-vertical row px-md-5" role="group">
+    <div class="btn-group">
+        <input style="color:#24ed3b;" name="openwifisetting" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="setting wifi"></input>
+        <input style="color:#24ed3b;" name="scan" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="scanwifi"></input>
+        <input style="color:#24ed3b;" name="shell_gui" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="cli Web Gui"></input>
+    </div>
+</div>
+</form>
+EOF
 }
