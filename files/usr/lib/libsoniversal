@@ -354,10 +354,10 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
         uci commit network
-        if [ $(uci get firewall.[2].name='wlan' | wc -l) != 1 ];then
                 echo "setting firewall"
                 N_ZONE=$(uci show firewall | grep zone | tail -1 | awk -F'[' '{print - $2}')
                 N=$((N+1))
+        if [ $(uci get firewall.[$N].name='wlan' | wc -l) != 1 ];then
                 uci -q add firewall zone
                 uci -q set firewall.[$N].name='wlan'
                 uci -q set firewall.[$N].output='ACCEPT'
