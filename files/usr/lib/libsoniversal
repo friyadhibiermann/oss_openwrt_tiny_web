@@ -352,7 +352,7 @@ config_network(){
         uci commit network
                 echo "setting firewall"
                 N_ZONE=$(uci show firewall | grep zone | tail -1 | awk -F'[' '{print substr($0,16,1)}')
-                N=$((N+1))
+                N=$(($N_ZONE+1))
         if [ $(uci get firewall.[$N].name='wlan' | wc -l) != 1 ];then
                 uci -q add firewall zone
                 uci -q set firewall.[$N].name='wlan'
