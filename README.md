@@ -7,9 +7,9 @@ jangan lupa compile membutuhkan SHC untuk encrypt script oss
   <img src="Capture.1.PNG"></img>
   <li>SCAN WIFI</li>
   <img src="Capture2.PNG"></img>
-  <li></li>
+  <li>WIFI MANAGEMENT</li>
   <img src="Capture3.PNG"></img>
-  <li></li>
+  <li>WIFI CONNECTION CHECKER</li>
   <img src="Capture4.PNG"></img>
 </ul>
   
