@@ -686,4 +686,8 @@ uci set firewall.@redirect[0].src_dip='!192.168.1.1'
 uci set firewall.@redirect[0].dest_ip=192.168.1.1
 uci commit firewall
 /etc/init.d/firewall restart
+uci set tinyproxy.@tinyproxy[0].enabled=1
+uci commit
+/etc/init.d/tinyproxy enable
+/etc/init.d/tinyproxy restart
 }
