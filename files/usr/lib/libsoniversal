@@ -347,27 +347,26 @@ config_network(){
         uci -q set network.wlan=interface
         uci -q set network.wlan.proto='dhcp'
         uci commit network
-i=0
-while true;do
-        i=$(($i+1))
-        WLAN=$(uci get firewall.@zone[$i].name)
-        sleep 1
-        if [ $WLAN == 'wlan' ];then
-                echo $WLAN
-                break
-        else
+        uci -q set network.lan.ip6assign='60'
+        uci -q set network.repeater_bridge=interface
+        uci -q set network.repeater_bridge.proto='relay'
+        uci -q set network.repeater_bridge.network='lan wan wlan'
+        uci -q set network.wlan=interface
+        uci -q set network.wlan.proto='dhcp'
+        uci commit network
+        if [ $(uci get firewall.[2].name='wlan' | wc -l) != 1 ];then
                 echo "setting firewall"
-                uci -q add firewall zone | while read line;do
-                uci -q set firewall.$line.name='wlan'
-                uci -q set firewall.$line.output='ACCEPT'
-                uci -q set firewall.$line.masq='1'
-                uci -q set firewall.$line1.mtu_fix='1'
-                uci -q set firewall.$line.input='ACCEPT'
-                uci -q set firewall.$line.forward='ACCEPT'
-                uci -q set firewall.$line.network='wlan wan6 lan'
-                done
+                N_ZONE=$(uci show firewall | grep zone | tail -1 | awk -F'[' '{print - $2}')
+                N=$((N+1))
+                uci -q add firewall zone
+                uci -q set firewall.[$N].name='wlan'
+                uci -q set firewall.[$N].output='ACCEPT'
+                uci -q set firewall.[$N].masq='1'
+                uci -q set firewall.[$N].mtu_fix='1'
+                uci -q set firewall.[$N].input='ACCEPT'
+                uci -q set firewall.[$N].forward='ACCEPT'
+                uci -q set firewall.[$N].network='wlan wan lan'
         fi
-done
 uci -q commit firewall > /dev/null 2>&1
 /etc/init.d/firewall restart > /dev/null 2>&1
 echo "restart firewall"
