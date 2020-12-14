@@ -344,10 +344,6 @@ config_network(){
         conf_dir="/etc/config"
         echo "setting network"
         uci -q set network.lan.ip6assign='60'
-        uci -q set network.wlan=interface
-        uci -q set network.wlan.proto='dhcp'
-        uci commit network
-        uci -q set network.lan.ip6assign='60'
         uci -q set network.repeater_bridge=interface
         uci -q set network.repeater_bridge.proto='relay'
         uci -q set network.repeater_bridge.network='lan wan wlan'
@@ -355,7 +351,7 @@ config_network(){
         uci -q set network.wlan.proto='dhcp'
         uci commit network
                 echo "setting firewall"
-                N_ZONE=$(uci show firewall | grep zone | tail -1 | awk -F'[' '{print - $2}')
+                N_ZONE=$(uci show firewall | grep zone | tail -1 | awk -F'[' '{print substr($0,16,1)}')
                 N=$((N+1))
         if [ $(uci get firewall.[$N].name='wlan' | wc -l) != 1 ];then
                 uci -q add firewall zone
