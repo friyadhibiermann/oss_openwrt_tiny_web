@@ -592,6 +592,7 @@ cat << EOF
 EOF
 echo "
 <link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/my.css" crossorigin="anonymous">
 <style type='text/css'>
  body {font-family:Consolas,Terminal,"Lucida Console",Courier,Monaco,monospace;
                         font-size:1em;white-space:pre-wrap;word-wrap:break-word;line-height:1.2em;
@@ -722,9 +723,9 @@ cat <<EOF
 <form method="get" action="">
 <div class="btn-group-vertical row px-md-5" role="group">
     <div class="btn-group">
-        <input style="color:#24ed3b;" name="openwifisetting" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="setting wifi"></input>
-        <input style="color:#24ed3b;" name="scan" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="scanwifi"></input>
-        <input style="color:#24ed3b;" name="shell_gui" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="cli Web Gui"></input>
+        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" name="openwifisetting" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="setting wifi"></input>
+        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" name="scan" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="scanwifi"></input>
+        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" name="shell_gui" type="submit" class="btn col px-md-3 btn-default border-bottom-0" value="cli Web Gui"></input>
     </div>
 </div>
 </form>
