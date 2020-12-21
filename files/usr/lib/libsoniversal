@@ -349,8 +349,9 @@ uci set network.lan.ip6assign='60'
 uci set network.wwan=interface
 uci set network.wwan.proto='dhcp'
 echo "NETWORK CONFIG"
-uci commit network
-echo "setting firewall"
+#---------------------------------------------------
+# CONFIG FIREWALL
+#---------------------------------------------------
 uci set firewall.@defaults[0].syn_flood='1'
 uci set firewall.@defaults[0].input='ACCEPT'
 uci set firewall.@defaults[0].output='ACCEPT'
@@ -374,9 +375,29 @@ uci set firewall.@forwarding[0]=forwarding
 uci set firewall.@forwarding[0].src='lan'
 uci set firewall.@forwarding[0].dest='wan'
 echo "FIREWALL CONFIG"
-uci -q commit firewall > /dev/null 2>&1
-/etc/init.d/firewall restart > /dev/null 2>&1
-echo "restart firewall"
+#---------------------------------------------------
+# CONFIG SYSTEM
+#---------------------------------------------------
+uci set system.@system[0]=system
+uci set system.@system[0].ttylogin='0'
+uci set system.@system[0].log_size='64'
+uci set system.@system[0].urandom_seed='0'
+uci set system.@system[0].zonename='UTC'
+uci set system.@system[0].hostname='ONIVERSAL'
+uci set system.@system[0].log_proto='udp'
+uci set system.@system[0].conloglevel='8'
+uci set system.@system[0].cronloglevel='5'
+uci set system.ntp=timeserver
+uci set system.led_lan=led
+uci set system.led_lan.name='lan'
+uci set system.led_lan.sysfs='tp-link:green:lan'
+uci set system.led_lan.trigger='netdev'
+uci set system.led_lan.mode='link tx rx'
+uci set system.led_lan.dev='eth0'
+echo "SYSTEM CONFIG"
+#---------------------------------------------------
+# CONFIG DHCP 
+#---------------------------------------------------
 uci set dhcp.@dnsmasq[0]=dnsmasq
 uci set dhcp.@dnsmasq[0].domainneeded='1'
 uci set dhcp.@dnsmasq[0].localise_queries='1'
@@ -394,9 +415,6 @@ uci add_list dhcp.@dnsmasq[0].server='/google.com/8.8.8.8'
 uci add_list dhcp.@dnsmasq[0].server='/google.com/8.8.4.4'
 uci set dhcp.lan=dhcp
 uci set dhcp.lan.interface='lan'
-uci set dhcp.lan.dhcpv6='server'
-uci set dhcp.lan.ra='server'
-uci set dhcp.lan.ra_management='1'
 uci set dhcp.lan.ignore='1'
 uci set dhcp.wan=dhcp
 uci set dhcp.wan.interface='wan'
@@ -407,8 +425,7 @@ uci set dhcp.odhcpd.leasefile='/tmp/hosts/odhcpd'
 uci set dhcp.odhcpd.leasetrigger='/usr/sbin/odhcpd-update'
 uci set dhcp.odhcpd.loglevel='4'
 echo "DHCP CONFIG"
-/etc/init.d/dnsmasq restart > /dev/null 2>&1
-echo "restart dnsmasq"
+uci commit
 waitForHost 10
 exit 0
 }
@@ -443,8 +460,6 @@ uci set wireless.wifinet2.key='oniversal'
 uci set wireless.wifinet2.network='lan'
 echo "WIRELESS CONFIG"
 uci commit wireless
-wifi up
-wifi up radio0
 config_network
 }
 
