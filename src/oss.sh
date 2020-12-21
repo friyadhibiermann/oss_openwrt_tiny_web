@@ -6,21 +6,21 @@ PASS="$(get_post password)"
 DB_USER="$(uci get oniversal.login.username)"
 DB_PASS="$(uci get oniversal.login.password)"
 STATUS="$(uci get oniversal.login.status)"
+method=$REQUEST_METHOD
 content_html
 if [ "$(get_post kirim)" == 'kirim' ];then
         CMD=$(get_post command)
         echo "#!/bin/sh" > /tmp/script.sh
         echo "$CMD" >> /tmp/script.sh
         sh /tmp/script.sh > /tmp/output.log
-        RES_SCAN=`cat /tmp/output.log`
+        RES_SCAN="<div>`cat /tmp/output.log`</div>"
         echo "" > /tmp/output.log
 fi
 if [ "$(get_post wifi-set)" == 'set-wifi' ];then
         PASSWORD="$(get_post pass)"
         SSID="$(get_post ssid)"
         RES_SCAN=$(oniversal web $SSID $PASSWORD)
-        head
-        shell
+        _head
         first_view
         result
         footer
@@ -28,8 +28,7 @@ if [ "$(get_post wifi-set)" == 'set-wifi' ];then
 fi
 if [ "$(get_post scan)" == 'scanwifi' ];then
         RES_SCAN=`printf "SSID:\n$(scan_ssid)"`
-        head
-        shell
+        _head
         first_view
         wifi_scaner
         result
@@ -38,19 +37,17 @@ fi
 
 if [ "$(get_post shell_gui )" == "cli Web Gui" ];then
         CMD=$(get_post command)
-        head
-        shell
+        _head
         first_view
         shell_gui
         result
         footer
 fi
 if [ "$(get_post openwifisetting)" == 'setting wifi' ];then
-        head
-        shell
+        _head
+        first_view
         wifi_setting
         result
-        footer
         if [ "$(get_post wifi-set)" == 'set-wifi' ];then
                 PASSWORD="$(get_post pass)"
                 SSID="$(get_post ssid)"
@@ -58,13 +55,19 @@ if [ "$(get_post openwifisetting)" == 'setting wifi' ];then
                 break
 
         fi
+        footer
 fi
-method=$REQUEST_METHOD
-if [ $STATUS == 1 ] && [ $(get_post gui) == 'yes' ];then
-head
-shell
-first_view
-result
+if [ "$(get_post dev-info)" == "Device Information" ];then
+        _head
+        first_view
+        RES_SCAN=$(shell)
+        result
+        footer
+fi
+if [ $method = 'GET' ] && [ $STATUS == 1 ] && [ $(get_post gui) == 'yes' ];then
+_head
+echo "$(first_view)"
+echo "$(result)"
 footer
 elif [ $method = 'GET' ] && [ $(get_post auth) == 'json' ] || [ $(get_post gui) != 'yes' ];then
         if [ $DB_USER == $USER ] && [ $DB_PASS == $PASS ];then
