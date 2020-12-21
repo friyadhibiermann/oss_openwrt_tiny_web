@@ -260,7 +260,7 @@ print_error() {
         logread | awk '/\w{3}+\.(err|warn|alert|emerg|crit)/{err[++i]=$0}END{j=i-4;j=j>=1?j:1;while(j<=i)print" '$ErrorColor'"err[j++]"'$NormalColor'"}' 2>/dev/null
 }
 
-oss_exroot(){
+exroot(){
         clear
                 _DEV=`block info | grep ext4 | awk -F':' '{print $1}' | cut -d'/' -f3`
                 _FREE_SPACE=`df -hm | grep '/overlay' | awk '{print $4}' | tail -1`
