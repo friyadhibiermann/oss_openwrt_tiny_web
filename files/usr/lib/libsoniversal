@@ -299,7 +299,6 @@ else
 
     while true; do
         i=$(($i+1))
-        wifi up radio0
         eval $PING_CMD
         if [[ $? -eq 0 ]]; then
             echo
