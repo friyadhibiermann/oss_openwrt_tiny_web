@@ -426,6 +426,8 @@ uci set dhcp.odhcpd.leasetrigger='/usr/sbin/odhcpd-update'
 uci set dhcp.odhcpd.loglevel='4'
 echo "DHCP CONFIG"
 uci commit
+wifi up
+wifi up radio0
 waitForHost 10
 exit 0
 }
