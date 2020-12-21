@@ -293,7 +293,8 @@ PING_CMD="ping -t 3 -c 1 google.com > /dev/null 2>&1"
 eval $PING_CMD
 
 if [ $( echo $IPADDRESS | wc -l ) == 1 ] ; then
-    echo "Already connected."
+    echo "Already connected...."
+    sleep 2
     echo "$IPADDRESS"
 else
     echo -n "Waiting for connection..."
