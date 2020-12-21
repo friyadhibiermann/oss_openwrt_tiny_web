@@ -260,7 +260,7 @@ print_error() {
         logread | awk '/\w{3}+\.(err|warn|alert|emerg|crit)/{err[++i]=$0}END{j=i-4;j=j>=1?j:1;while(j<=i)print" '$ErrorColor'"err[j++]"'$NormalColor'"}' 2>/dev/null
 }
 
-exroot(){
+oss_exroot(){
         clear
                 _DEV=`block info | grep ext4 | awk -F':' '{print $1}' | cut -d'/' -f3`
                 _FREE_SPACE=`df -hm | grep '/overlay' | awk '{print $4}' | tail -1`
@@ -341,31 +341,72 @@ fi
 }
 
 config_network(){
-        conf_dir="/etc/config"
-        echo "setting network"
-        uci -q set network.lan.ip6assign='60'
-        uci -q set network.repeater_bridge=interface
-        uci -q set network.repeater_bridge.proto='relay'
-        uci -q set network.repeater_bridge.network='lan wan wlan'
-        uci -q set network.wlan=interface
-        uci -q set network.wlan.proto='dhcp'
-        uci commit network
-                echo "setting firewall"
-if [ $(uci get firewall.@zone[-1].name) != 'wlan' ];then
-uci batch << EOF
-add firewall zone
-set firewall.@zone[-1].name='wlan'
-set firewall.@zone[-1].network='wlan wan lan'
-set firewall.@zone[-1].output='ACCEPT'
-set firewall.@zone[-1].input='REJECT'
-set firewall.@zone[-1].forward='ACCEPT'
-EOF
-else
-echo "firewall wlan sudah ada"
-fi
+#---------------------------------------------------
+# CONFIG NETWORK
+#---------------------------------------------------
+uci set network.lan.netmask='255.255.255.0'
+uci set network.lan.ip6assign='60'
+uci set network.wwan=interface
+uci set network.wwan.proto='dhcp'
+echo "NETWORK CONFIG"
+uci commit network
+echo "setting firewall"
+uci set firewall.@defaults[0].syn_flood='1'
+uci set firewall.@defaults[0].input='ACCEPT'
+uci set firewall.@defaults[0].output='ACCEPT'
+uci set firewall.@defaults[0].forward='ACCEPT'
+uci set firewall.@zone[0]=zone
+uci set firewall.@zone[0].name='lan'
+uci set firewall.@zone[0].network='lan'
+uci set firewall.@zone[0].input='ACCEPT'
+uci set firewall.@zone[0].output='ACCEPT'
+uci set firewall.@zone[0].forward='ACCEPT'
+uci set firewall.@zone[0].masq='1'
+uci set firewall.@zone[1]=zone
+uci set firewall.@zone[1].name='wan'
+uci set firewall.@zone[1].input='ACCEPT'
+uci set firewall.@zone[1].output='ACCEPT'
+uci set firewall.@zone[1].forward='ACCEPT'
+uci set firewall.@zone[1].masq='1'
+uci set firewall.@zone[1].mtu_fix='1'
+uci set firewall.@zone[1].network='wan wan6 wwan'
+uci set firewall.@forwarding[0]=forwarding
+uci set firewall.@forwarding[0].src='lan'
+uci set firewall.@forwarding[0].dest='wan'
+echo "FIREWALL CONFIG"
 uci -q commit firewall > /dev/null 2>&1
 /etc/init.d/firewall restart > /dev/null 2>&1
 echo "restart firewall"
+uci set dhcp.@dnsmasq[0]=dnsmasq
+uci set dhcp.@dnsmasq[0].domainneeded='1'
+uci set dhcp.@dnsmasq[0].localise_queries='1'
+uci set dhcp.@dnsmasq[0].rebind_protection='1'
+uci set dhcp.@dnsmasq[0].rebind_localhost='1'
+uci set dhcp.@dnsmasq[0].local='/lan/'
+uci set dhcp.@dnsmasq[0].domain='lan'
+uci set dhcp.@dnsmasq[0].expandhosts='1'
+uci set dhcp.@dnsmasq[0].authoritative='1'
+uci set dhcp.@dnsmasq[0].readethers='1'
+uci set dhcp.@dnsmasq[0].leasefile='/tmp/dhcp.leases'
+uci set dhcp.@dnsmasq[0].localservice='1'
+uci set dhcp.@dnsmasq[0].server='/oniversal.local/127.0.0.1'
+uci add_list dhcp.@dnsmasq[0].server='/google.com/8.8.8.8'
+uci add_list dhcp.@dnsmasq[0].server='/google.com/8.8.4.4'
+uci set dhcp.lan=dhcp
+uci set dhcp.lan.interface='lan'
+uci set dhcp.lan.dhcpv6='server'
+uci set dhcp.lan.ra='server'
+uci set dhcp.lan.ra_management='1'
+uci set dhcp.lan.ignore='1'
+uci set dhcp.wan=dhcp
+uci set dhcp.wan.interface='wan'
+uci set dhcp.wan.ignore='1'
+uci set dhcp.odhcpd=odhcpd
+uci set dhcp.odhcpd.maindhcp='0'
+uci set dhcp.odhcpd.leasefile='/tmp/hosts/odhcpd'
+uci set dhcp.odhcpd.leasetrigger='/usr/sbin/odhcpd-update'
+uci set dhcp.odhcpd.loglevel='4'
+echo "DHCP CONFIG"
 /etc/init.d/dnsmasq restart > /dev/null 2>&1
 echo "restart dnsmasq"
 waitForHost 10
@@ -382,28 +423,29 @@ config_wireless(){
                         KEY="$3"
                         ;;
                 esac
-        conf_dir="/etc/config"
-        config="wireless"
-        DEFAULT=$(uci show wireless | grep lan | awk -F'.' '{print $2}')
-        uci -q set wireless.$DEFAULT.ssid='ONIVERSAL-OSS'
-        uci -q set wireless.$DEFAULT.encryption='psk2'
-        uci -q set wireless.$DEFAULT.key='admin'
-        echo "seting access point"
-        if [ "$SSID" != "" -o "$KEY" != "" ];then
-                echo "setting wifi repearter"
-                uci -q add_list wireless.repearer_radio0=wifi-iface
-                uci -q set wireless.repearer_radio0.device='radio0'
-                uci -q set wireless.repearer_radio0.network='wlan'
-                uci -q set wireless.repearer_radio0.ssid="$SSID"
-                uci -q set wireless.repearer_radio0.encryption='psk2'
-                uci -q set wireless.repearer_radio0.mode='sta'
-                uci -q set wireless.repearer_radio0.key="$KEY"
-
-        fi
-        uci commit wireless
-        wifi up
-        wifi up radio0
-        config_network
+IW_STA_SSID="$SSID"
+IW_STA_PASS="$KEY"
+uci delete wireless.default_radio0
+uci set wireless.radio0.disabled='0'
+uci set wireless.wifinet1=wifi-iface
+uci set wireless.wifinet1.ssid="$IW_STA_SSID"
+uci set wireless.wifinet1.device='radio0'
+uci set wireless.wifinet1.mode='sta'
+uci set wireless.wifinet1.key="$IW_STA_PASS"
+uci set wireless.wifinet1.network='wwan'
+uci set wireless.wifinet1.encryption='psk2'
+uci set wireless.wifinet2=wifi-iface
+uci set wireless.wifinet2.ssid='ONIVERSAL'
+uci set wireless.wifinet2.encryption='psk'
+uci set wireless.wifinet2.device='radio0'
+uci set wireless.wifinet2.mode='ap'
+uci set wireless.wifinet2.key='oniversal'
+uci set wireless.wifinet2.network='lan'
+echo "WIRELESS CONFIG"
+uci commit wireless
+wifi up
+wifi up radio0
+config_network
 }
 
 help(){
