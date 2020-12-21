@@ -4,7 +4,7 @@ initialize() {
                 HTML="1"
                 ColorMode="html"
                 StartRuler=""
-                EndRuler="1"
+                EndRuler="0"
         fi
         [ -e /etc/web.banner ] && Width=$(awk 'BEGIN{max=0}{if(length($0)>max)max=length($0)}END{print max}' /etc/banner 2>/dev/null)
         while [ -n "$1" ]; do
@@ -70,7 +70,7 @@ initialize() {
                         ErrorColor="</font><font class=\"Error\">";;
                 *)      ;;
         esac
-        ([ "$Width" == "" ] || [ "$Width" -lt 50 ]) && Width=50
+        ([ "$Width" == "" ] || [ "$Width" -lt 50 ]) && Width=20
         if [ "$HTML" == "1" ]; then
         [ -e /etc/web.banner ] && cat /etc/web.banner
         fi
@@ -78,7 +78,7 @@ initialize() {
 finalize() {
         if [ "$HTML" == "1" ]; then
                 cat << EOF
-        </div>
+
 EOF
         fi
 }
@@ -115,7 +115,7 @@ uptime_str() { # <Time in Seconds>
 print_line() { # <String to Print>, [[<String to Print>] ...]
         local Line="$@"
         if [ "$HTML" == "1" ]; then
-                printf "   $Line\n" 2>/dev/null
+                printf "" 2>/dev/null
         else
                 printf " | %-$(expr $Width - 5)s |\r | $Line\n" 2>/dev/null
         fi
@@ -398,7 +398,7 @@ uci set system.led_lan.dev='eth0'
 echo "SYSTEM CONFIG"
 #---------------------------------------------------
 # CONFIG DHCP
-#---------------------------------------------------
+        #---------------------------------------------------
 uci set dhcp.@dnsmasq[0]=dnsmasq
 uci set dhcp.@dnsmasq[0].domainneeded='1'
 uci set dhcp.@dnsmasq[0].localise_queries='1'
@@ -557,17 +557,17 @@ query_fix(){
 
 shell(){
 cat <<EOF
-<ul class="list-group">
-  <li class="list-group-item active">$(print_machine)</li>
-  <li class="list-group-item">$(print_times)</li>
-  <li class="list-group-item">$(print_loadavg)</li>
-  <li class="list-group-item">$(print_disk)</li>
-  <li class="list-group-item">$(print_memory)</li>
-  <li class="list-group-item">$(print_swap)</li>
-  <li class="list-group-item">$(print_wlan)</li>
-  <li class="list-group-item">$(print_vpn)</li>
-  <li class="list-group-item">$(print_extra)</li>
-</ul>
+<pre style="overflow-x: hidden;" class="text-success">
+<code>
+$(initialize $@ |sed 's/|//g')
+$(print_machine|sed 's/|//g')
+$(print_times|sed 's/|//g')
+$(print_times|sed 's/|//g')
+$(print_loadavg|sed 's/|//g')
+$(print_disk|sed 's/|//g')
+$(print_memory|sed 's/|//g')
+</code>
+</pre>
 EOF
 }
 
@@ -591,6 +591,7 @@ cat << EOF
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
                 <link rel="stylesheet" href="/css/my.css" crossorigin="anonymous">
+                <script src="/js/jquery-1.8.0.min.js"></script>
         </head>
 <body class="text-center">
 <main role="main" class="container">
@@ -604,7 +605,7 @@ footer(){
 cat << EOF
 <div style="bottom: 0;position: absolute;width: 100%;height: 60px;line-height: 60px;color: white;" class="footer">
         <div class="container">
-        <span class="text-muted">Place sticky footer content here.</span>
+                <span class="text-muted">Place sticky footer content here.</span>
         </div>
 </div>
 </body>
@@ -625,9 +626,9 @@ if [ "$(get_post send)" == 'send' ];then
         echo "" > /tmp/output.log
 fi
 cat <<EOF
-<div class="mt-n5 px-md-5" role="group">
+<div class="mt-n5 px-md-5 mt-5" role="group">
 <div class='pre-scrollable'>
-<pre style="color:#048012;">$RES_SCAN</pre>
+<pre class="text-left" style="color:#048012;background-color:black;">$RES_SCAN</pre>
 </div>
 </div>
 EOF
@@ -636,30 +637,34 @@ EOF
 
 wifi_setting(){
 cat <<EOF
-<div class="row px-md-4">
         <form method='get'>
-                <div class="input-group row px-md-4">
-                <input type='hidden' name='gui' value='yes'></input>
-                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
-                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
-                <input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
+                <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
+                <div class="input-group">
+                        <input type='hidden' name='gui' value='yes'></input>
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
+                </div>
+                <div class="btn-group">
+                        <input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
+                </div>
                 </div>
         </form>
-</div>
 EOF
 }
 
 shell_gui(){
 cat <<EOF
-<div class="row px-md-4">
 <form id="web_shell" method='get'>
-        <div class="input-group row px-md-4">
-                <input type='hidden' name='gui' value='yes'></input>
-                <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
-                <input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
+        <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
+                <div class="input-group">
+                        <input type='hidden' name='gui' value='yes'></input>
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
+                </div>
+                <div class="btn-group">
+                        <input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
+                </div>
         </div>
 </form>
-</div>
 EOF
 }
 content_html(){
@@ -671,6 +676,10 @@ first_view(){
 cat <<EOF
         <form method="get" action="">
                 <div class="btn-group-vertical row" role="group">
+                        <div class="btn-group">
+                                <input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
+                                </input>
+                        </div>
                         <div class="btn-group">
                                 <input name="openwifisetting" type="submit" class="btn" value="setting wifi"></input>
                                 <input name="scan" type="submit" class="btn" value="scanwifi"></input>
