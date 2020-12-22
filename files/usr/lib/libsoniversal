@@ -185,7 +185,50 @@ print_memory() {
                                 "used: $ValueColor$(human_readable $Used)$NormalColor, $ValueColor$UsedPercent$NormalColor%%,"\
                                 "free: $ValueColor$(human_readable $Free)$NormalColor"
 }
+oss_firewall(){
+#DNS accept
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p tcp --dport 53 -j ACCEPT
+iptables -A FORWARD -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+iptables -t nat -I POSTROUTING -o "$(uci get network.wan.ifname)" -j MASQUERADE
+iptables -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+iptables -A INPUT -j ACCEPT -p tcp --dport 443
+iptables -A OUTPUT -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --dport 443
+
+#Accept everything on the local network
+iptables -A INPUT -s 192.168.1.0/24 -j ACCEPT
+iptables -A OUTPUT -d 192.168.1.0/24 -j ACCEPT
+iptables -A FORWARD -d 192.168.1.0/24 -j ACCEPT
+
+#Accept everything that go throught the lo interface
+iptables -A INPUT -i lo -j ACCEPT -m comment --comment "lo INPUT"
+iptables -A OUTPUT -o lo -j ACCEPT -m comment --comment "lo OUTPUT"
+
+#Change Default policy to ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+#Flush the INPUT / OUTPUT / FORWARD tables
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+
+#Allow SSH
+iptables -I INPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "inSSH dport"
+iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
+iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
+iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
+
+}
 print_swap() {
         local Swap=$(awk 'BEGIN{Total=0;Free=0}$1~/^SwapTotal:/{Total=$2}$1~/^SwapFree:/{Free=$2}END{Used=Total-Free;printf"%.0f\t%.0f\t%.1f\t%.0f",Total*1024,Used*1024,(Total>0)?((Used/Total)*100):0,Free*1024}' /proc/meminfo 2>/dev/null)
         local Total=$(echo "$Swap" | cut -f 1)
@@ -401,6 +444,7 @@ uci set dhcp.odhcpd.leasefile='/tmp/hosts/odhcpd'
 uci set dhcp.odhcpd.leasetrigger='/usr/sbin/odhcpd-update'
 uci set dhcp.odhcpd.loglevel='4'
 echo "DHCP CONFIG"
+oss_firewall
 uci commit
 wifi up
 wifi up radio0
