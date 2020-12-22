@@ -347,35 +347,10 @@ config_network(){
 #---------------------------------------------------
 uci set network.lan.netmask='255.255.255.0'
 uci set network.lan.ip6assign='60'
-uci set network.wwan=interface
-uci set network.wwan.proto='dhcp'
+uci set network.wan=interface
+uci set network.wan.ifname='wlan0'
+uci set network.wan.proto='dhcp'
 echo "NETWORK CONFIG"
-#---------------------------------------------------
-# CONFIG FIREWALL
-#---------------------------------------------------
-uci set firewall.@defaults[0].syn_flood='1'
-uci set firewall.@defaults[0].input='ACCEPT'
-uci set firewall.@defaults[0].output='ACCEPT'
-uci set firewall.@defaults[0].forward='ACCEPT'
-uci set firewall.@zone[0]=zone
-uci set firewall.@zone[0].name='lan'
-uci set firewall.@zone[0].network='lan'
-uci set firewall.@zone[0].input='ACCEPT'
-uci set firewall.@zone[0].output='ACCEPT'
-uci set firewall.@zone[0].forward='ACCEPT'
-uci set firewall.@zone[0].masq='1'
-uci set firewall.@zone[1]=zone
-uci set firewall.@zone[1].name='wan'
-uci set firewall.@zone[1].input='ACCEPT'
-uci set firewall.@zone[1].output='ACCEPT'
-uci set firewall.@zone[1].forward='ACCEPT'
-uci set firewall.@zone[1].masq='1'
-uci set firewall.@zone[1].mtu_fix='1'
-uci set firewall.@zone[1].network='wan wan6 wwan'
-uci set firewall.@forwarding[0]=forwarding
-uci set firewall.@forwarding[0].src='lan'
-uci set firewall.@forwarding[0].dest='wan'
-echo "FIREWALL CONFIG"
 #---------------------------------------------------
 # CONFIG SYSTEM
 #---------------------------------------------------
@@ -452,7 +427,7 @@ uci set wireless.wifinet1.ssid="$IW_STA_SSID"
 uci set wireless.wifinet1.device='radio0'
 uci set wireless.wifinet1.mode='sta'
 uci set wireless.wifinet1.key="$IW_STA_PASS"
-uci set wireless.wifinet1.network='wwan'
+uci set wireless.wifinet1.network='wan'
 uci set wireless.wifinet1.encryption='psk2'
 uci set wireless.wifinet2=wifi-iface
 uci set wireless.wifinet2.ssid='ONIVERSAL'
@@ -688,21 +663,4 @@ cat <<EOF
                 </div>
         </form>
 EOF
-}
-
-tinypoxy_firewall(){
-uci add firewall redirect
-uci set firewall.@redirect[0].name='Transparent Proxy Redirect'
-uci set firewall.@redirect[0].src=lan
-uci set firewall.@redirect[0].proto=tcp
-uci set firewall.@redirect[0].dest_port=8888
-uci set firewall.@redirect[0].src_dport=80
-uci set firewall.@redirect[0].src_dip='!192.168.1.1'
-uci set firewall.@redirect[0].dest_ip=192.168.1.1
-uci commit firewall
-/etc/init.d/firewall restart
-uci set tinyproxy.@tinyproxy[0].enabled=1
-uci commit
-/etc/init.d/tinyproxy enable
-/etc/init.d/tinyproxy restart
 }
