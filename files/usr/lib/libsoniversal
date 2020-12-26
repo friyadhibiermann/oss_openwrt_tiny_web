@@ -601,7 +601,7 @@ oniversal(){
 
 case $1 in
         'web')
-        config_wireless web $2 $3
+        ping -c 1 8.8.8.8 > /dev/null && echo "internet berjalan baik" || config_wireless web $2 $3
         ;;
         *)
         base_script
