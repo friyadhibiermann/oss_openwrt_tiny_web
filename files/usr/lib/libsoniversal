@@ -461,16 +461,16 @@ waitForHost 10
 exit 0
 }
 config_wireless(){
-                case $1 in
-                        *)
-                        read -p "SSID: " SSID
-                        read -p "KEY: " KEY
-                        ;;
-                        'web')
-                        SSID="$2"
-                        KEY="$3"
-                        ;;
-                esac
+case $1 in
+'set')
+read -p "SSID: " SSID
+read -p "KEY: " KEY
+;;
+'web')
+SSID=$2
+KEY=$3
+;;
+esac
 IW_STA_SSID="$SSID"
 IW_STA_PASS="$KEY"
 uci delete wireless.default_radio0
@@ -550,7 +550,7 @@ config_wireless web $2 $3
                                                                 printf "%s\n" "$SCAN"
                                                                 echo "################"
                                                                 LIST=$(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//' | wc -l)
-                                                                config_wireless
+                                                                config_wireless set
                                                         else
                                                         LIST=0
                                                         echo "ulangi lagi"
@@ -603,7 +603,7 @@ oniversal(){
 
 case $1 in
         'web')
-        base_script $2 $3
+        config_wireless web $2 $3
         ;;
         *)
         base_script
