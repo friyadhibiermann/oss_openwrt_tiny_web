@@ -497,6 +497,11 @@ base_script(){
         wifi up
         wifi up radio0
         sleep 10
+case $1 in
+'web')
+config_wireless web $2 $3
+;;
+*)
                 STAT="$(ifconfig | grep wlan0 | wc -l)"
                 while [ ${STAT} != 0 ];do
                         help
@@ -517,14 +522,7 @@ base_script(){
                                                                 printf "%s\n" "$SCAN"
                                                                 echo "################"
                                                                 LIST=$(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//' | wc -l)
-                                                                case $1 in
-                                                                        'web')
-                                                                                config_wireless web $2 $3
-                                                                        ;;
-                                                                        *)
-                                                                                config_wireless
-                                                                        ;;
-                                                                esac
+                                                              	config_wireless
                                                         else
                                                         LIST=0
                                                         echo "ulangi lagi"
@@ -535,6 +533,8 @@ base_script(){
                 STAT="$(ifconfig | grep wlan0 | wc -l)"
                 wifi up
                 done
+;;
+esac
 }
 
 scan_ssid(){
