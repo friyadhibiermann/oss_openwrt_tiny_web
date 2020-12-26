@@ -19,7 +19,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=oss
-PKG_VERSION:=1.0.1
+PKG_VERSION:=1.0.3
 PKG_MAINTAINER:=Bandung, ONIVERSAL <friyadhibiermann>, indonesian
 DEPENDS:=
 

@@ -185,50 +185,7 @@ print_memory() {
                                 "used: $ValueColor$(human_readable $Used)$NormalColor, $ValueColor$UsedPercent$NormalColor%%,"\
                                 "free: $ValueColor$(human_readable $Free)$NormalColor"
 }
-oss_firewall(){
-#DNS accept
-iptables -A INPUT -i "$(uci get network.wan.ifname)" -p udp --sport 53 -j ACCEPT
-iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p udp --dport 53 -j ACCEPT
-iptables -A INPUT -i "$(uci get network.wan.ifname)" -p tcp --sport 53 -j ACCEPT
-iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p tcp --dport 53 -j ACCEPT
-iptables -A FORWARD -p udp --sport 53 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-iptables -A INPUT -p tcp --sport 53 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
-iptables -t nat -I POSTROUTING -o "$(uci get network.wan.ifname)" -j MASQUERADE
-iptables -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-iptables -A INPUT -j ACCEPT -p tcp --dport 443
-iptables -A OUTPUT -j ACCEPT -p tcp --sport 443
-iptables -A FORWARD -j ACCEPT -p tcp --sport 443
-iptables -A FORWARD -j ACCEPT -p tcp --dport 443
-
-#Accept everything on the local network
-iptables -A INPUT -s 192.168.1.0/24 -j ACCEPT
-iptables -A OUTPUT -d 192.168.1.0/24 -j ACCEPT
-iptables -A FORWARD -d 192.168.1.0/24 -j ACCEPT
-
-#Accept everything that go throught the lo interface
-iptables -A INPUT -i lo -j ACCEPT -m comment --comment "lo INPUT"
-iptables -A OUTPUT -o lo -j ACCEPT -m comment --comment "lo OUTPUT"
-
-#Change Default policy to ACCEPT
-iptables -P INPUT ACCEPT
-iptables -P OUTPUT ACCEPT
-iptables -P FORWARD ACCEPT
-#Flush the INPUT / OUTPUT / FORWARD tables
-iptables -F INPUT
-iptables -F OUTPUT
-iptables -F FORWARD
-
-
-#Allow SSH
-iptables -I INPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "inSSH dport"
-iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
-iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
-iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
-
-}
 print_swap() {
         local Swap=$(awk 'BEGIN{Total=0;Free=0}$1~/^SwapTotal:/{Total=$2}$1~/^SwapFree:/{Free=$2}END{Used=Total-Free;printf"%.0f\t%.0f\t%.1f\t%.0f",Total*1024,Used*1024,(Total>0)?((Used/Total)*100):0,Free*1024}' /proc/meminfo 2>/dev/null)
         local Total=$(echo "$Swap" | cut -f 1)
@@ -390,10 +347,35 @@ config_network(){
 #---------------------------------------------------
 uci set network.lan.netmask='255.255.255.0'
 uci set network.lan.ip6assign='60'
-uci set network.wan=interface
-uci set network.wan.ifname='wlan0'
-uci set network.wan.proto='dhcp'
+uci set network.wwan=interface
+uci set network.wwan.proto='dhcp'
 echo "NETWORK CONFIG"
+#---------------------------------------------------
+# CONFIG FIREWALL
+#---------------------------------------------------
+uci set firewall.@defaults[0].syn_flood='1'
+uci set firewall.@defaults[0].input='ACCEPT'
+uci set firewall.@defaults[0].output='ACCEPT'
+uci set firewall.@defaults[0].forward='ACCEPT'
+uci set firewall.@zone[0]=zone
+uci set firewall.@zone[0].name='lan'
+uci set firewall.@zone[0].network='lan'
+uci set firewall.@zone[0].input='ACCEPT'
+uci set firewall.@zone[0].output='ACCEPT'
+uci set firewall.@zone[0].forward='ACCEPT'
+uci set firewall.@zone[0].masq='1'
+uci set firewall.@zone[1]=zone
+uci set firewall.@zone[1].name='wan'
+uci set firewall.@zone[1].input='ACCEPT'
+uci set firewall.@zone[1].output='ACCEPT'
+uci set firewall.@zone[1].forward='ACCEPT'
+uci set firewall.@zone[1].masq='1'
+uci set firewall.@zone[1].mtu_fix='1'
+uci set firewall.@zone[1].network='wan wan6 wwan'
+uci set firewall.@forwarding[0]=forwarding
+uci set firewall.@forwarding[0].src='lan'
+uci set firewall.@forwarding[0].dest='wan'
+echo "FIREWALL CONFIG"
 #---------------------------------------------------
 # CONFIG SYSTEM
 #---------------------------------------------------
@@ -416,7 +398,7 @@ uci set system.led_lan.dev='eth0'
 echo "SYSTEM CONFIG"
 #---------------------------------------------------
 # CONFIG DHCP
-        #---------------------------------------------------
+	#---------------------------------------------------
 uci set dhcp.@dnsmasq[0]=dnsmasq
 uci set dhcp.@dnsmasq[0].domainneeded='1'
 uci set dhcp.@dnsmasq[0].localise_queries='1'
@@ -444,7 +426,6 @@ uci set dhcp.odhcpd.leasefile='/tmp/hosts/odhcpd'
 uci set dhcp.odhcpd.leasetrigger='/usr/sbin/odhcpd-update'
 uci set dhcp.odhcpd.loglevel='4'
 echo "DHCP CONFIG"
-oss_firewall
 uci commit
 wifi up
 wifi up radio0
@@ -471,7 +452,7 @@ uci set wireless.wifinet1.ssid="$IW_STA_SSID"
 uci set wireless.wifinet1.device='radio0'
 uci set wireless.wifinet1.mode='sta'
 uci set wireless.wifinet1.key="$IW_STA_PASS"
-uci set wireless.wifinet1.network='wan'
+uci set wireless.wifinet1.network='wwan'
 uci set wireless.wifinet1.encryption='psk2'
 uci set wireless.wifinet2=wifi-iface
 uci set wireless.wifinet2.ssid='ONIVERSAL'
@@ -610,7 +591,7 @@ cat << EOF
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
                 <link rel="stylesheet" href="/css/my.css" crossorigin="anonymous">
-                <script src="/js/jquery-1.8.0.min.js"></script>
+		<script src="/js/jquery-1.8.0.min.js"></script>
         </head>
 <body class="text-center">
 <main role="main" class="container">
@@ -624,7 +605,7 @@ footer(){
 cat << EOF
 <div style="bottom: 0;position: absolute;width: 100%;height: 60px;line-height: 60px;color: white;" class="footer">
         <div class="container">
-                <span class="text-muted">Place sticky footer content here.</span>
+        	<span class="text-muted">oniversal indonesia - oss (2021)</span>
         </div>
 </div>
 </body>
@@ -647,7 +628,7 @@ fi
 cat <<EOF
 <div class="mt-n5 px-md-5 mt-5" role="group">
 <div class='pre-scrollable'>
-<pre class="text-left" style="color:#048012;background-color:black;">$RES_SCAN</pre>
+<pre class="text-left" style="max-height:180px;color:#048012;background-color:black;">$RES_SCAN</pre>
 </div>
 </div>
 EOF
@@ -658,15 +639,15 @@ wifi_setting(){
 cat <<EOF
         <form method='get'>
                 <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
-                <div class="input-group">
-                        <input type='hidden' name='gui' value='yes'></input>
-                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
-                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
+		<div class="input-group">
+                	<input type='hidden' name='gui' value='yes'></input>
+                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
+                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
                 </div>
-                <div class="btn-group">
-                        <input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
-                </div>
-                </div>
+		<div class="btn-group">
+			<input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
+		</div>
+		</div>
         </form>
 EOF
 }
@@ -675,14 +656,14 @@ shell_gui(){
 cat <<EOF
 <form id="web_shell" method='get'>
         <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
-                <div class="input-group">
-                        <input type='hidden' name='gui' value='yes'></input>
-                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
+		<div class="input-group">
+                	<input type='hidden' name='gui' value='yes'></input>
+                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
                 </div>
-                <div class="btn-group">
-                        <input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
-                </div>
-        </div>
+		<div class="btn-group">
+			<input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
+        	</div>
+	</div>
 </form>
 EOF
 }
@@ -695,11 +676,11 @@ first_view(){
 cat <<EOF
         <form method="get" action="">
                 <div class="btn-group-vertical row" role="group">
-                        <div class="btn-group">
-                                <input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
-                                </input>
+			<div class="btn-group">
+				<input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
+				</input>
                         </div>
-                        <div class="btn-group">
+			<div class="btn-group">
                                 <input name="openwifisetting" type="submit" class="btn" value="setting wifi"></input>
                                 <input name="scan" type="submit" class="btn" value="scanwifi"></input>
                                 <input name="shell_gui" type="submit" class="btn" value="cli Web Gui"></input>
@@ -707,4 +688,21 @@ cat <<EOF
                 </div>
         </form>
 EOF
+}
+
+tinypoxy_firewall(){
+uci add firewall redirect
+uci set firewall.@redirect[0].name='Transparent Proxy Redirect'
+uci set firewall.@redirect[0].src=lan
+uci set firewall.@redirect[0].proto=tcp
+uci set firewall.@redirect[0].dest_port=8888
+uci set firewall.@redirect[0].src_dport=80
+uci set firewall.@redirect[0].src_dip='!192.168.1.1'
+uci set firewall.@redirect[0].dest_ip=192.168.1.1
+uci commit firewall
+/etc/init.d/firewall restart
+uci set tinyproxy.@tinyproxy[0].enabled=1
+uci commit
+/etc/init.d/tinyproxy enable
+/etc/init.d/tinyproxy restart
 }

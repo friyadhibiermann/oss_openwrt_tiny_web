@@ -1,45 +1,40 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ONIVERSAL OSS</title>
-    <style type="text/css">
-      #loginContent { width: 350px; margin: 100px auto; }
-      button[type] { margin: 0.5em 0; }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/ico/oss.ico">
+    <title>ONIVERSAL</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/my.css" rel="stylesheet">
+    <link href="css/signin.css" rel="stylesheet">
     <script src="js/jquery-1.8.0.min.js" type="text/javascript"></script>
-    <script src="jquery.redirect.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="css/my.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
   </head>
-  <body>
-    <div id="loginContent" class="">
-      <div id="loginResult" style="display:none;"></div>
+  <body class="text-center">
+    <form id="loginForm" name="loginForm" method="GET" class="form-signin">
+      <h1 class="h3 mb-3 font-weight-normal">
+	<img class="mb-2 rotate img-rounded" src="/ico/oss.ico" alt="" width="32" height="32">
+      Please sign in</h1>
+      <label for="username" class="sr-only">Email address</label>
+      <input name="userneme" type="username" id="username" class="form-control" placeholder="username" required autofocus>
+      <label for="password" class="sr-only">Password</label>
+      <input name="password" type="password" id="password" class="form-control" placeholder="Password" required>
       <div id="loading-container" class="loading-container"></div>
-      <div class = "form_wrapper">
-      <form id="loginForm" name="loginForm" method="get" action="">
-        <fieldset>
-          <legend>OSS Login Page</legend>
-          <p>
-            <label for="username">Username</label>
-            <br />
-            <input type="text" id="username" name="username" class="text" size="20" />
-          </p>
-          <p>
-            <label for="password">Password</label>
-            <br />
-            <input type="password" id="password" name="password" class="text" size="20" />
-          </p>
-          <p>
-            <button id="login" type="submit" class="button vertical-center">
-		Login
-            </button>
-          </p>
-        </fieldset>
-	<div id="hash"></div>
-      </form>
+      <div id="loginResult" style="display:none;"></div>
+      <div class="checkbox mb-3">
+        <label>
+          <input type="checkbox" value="remember-me"> Remember me
+        </label>
       </div>
-    </div>
+      <button id="submit" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <p class="mt-5 mb-3 text-muted">&copy; oniversal indonesia - oss (2020) </p>
+    </form>
     <script src="js/login.js" type="text/javascript"></script>
     <script src="js/loader.js" type="text/javascript"></script>
   </body>
 </html>
+

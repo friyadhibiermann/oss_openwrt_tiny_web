@@ -5,7 +5,7 @@ $(document).ready(function(){
     var password = $('#password').attr('value'); // get password
     if (username && password) { // values are not empty
       $.ajax({
-        type: "POST",
+        type: "GET",
         url: "/cgi-bin/oss", // URL of the Perl script
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -29,13 +29,13 @@ $(document).ready(function(){
             $('form#loginForm').hide();
             $('div#loginResult').text("data.success: " + data.success
               + ", data.username: " + data.username);
-            if ( data.success == 1 ) {
-                //window.location.assign("/cgi-bin/oss?gui=yes")
-
-                window.location.href = '/cgi-bin/oss?gui=yes';
-            }
-            $('body').html(data);
-            //if ( data.success == 1 ) {
+	    if ( data.success == 1 ) {
+		//window.location.assign("/cgi-bin/oss?gui=yes")
+		
+		window.location.href = '/cgi-bin/oss?gui=yes';
+	    }
+	    $('body').html(data);
+	    //if ( data.success == 1 ) {
             //}
           } //else
         }// success
