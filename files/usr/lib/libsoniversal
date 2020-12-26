@@ -1,3 +1,48 @@
+oss_firewall(){
+#DNS accept
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p tcp --dport 53 -j ACCEPT
+iptables -A FORWARD -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+iptables -t nat -I POSTROUTING -o "$(uci get network.wan.ifname)" -j MASQUERADE
+iptables -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A INPUT -j ACCEPT -p tcp --dport 443
+iptables -A OUTPUT -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --dport 443
+
+#Accept everything on the local network
+iptables -A INPUT -s 192.168.1.0/24 -j ACCEPT
+iptables -A OUTPUT -d 192.168.1.0/24 -j ACCEPT
+iptables -A FORWARD -d 192.168.1.0/24 -j ACCEPT
+
+#Accept everything that go throught the lo interface
+iptables -A INPUT -i lo -j ACCEPT -m comment --comment "lo INPUT"
+iptables -A OUTPUT -o lo -j ACCEPT -m comment --comment "lo OUTPUT"
+
+#Change Default policy to ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+#Flush the INPUT / OUTPUT / FORWARD tables
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+
+#Allow SSH
+iptables -I INPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "inSSH dport"
+iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
+iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
+iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
+
+
+}
 initialize() {
         local ColorMode="c"
         if [ ! -z "$REQUEST_METHOD" ]; then
@@ -342,6 +387,7 @@ fi
 }
 
 config_network(){
+oss_firewall
 #---------------------------------------------------
 # CONFIG NETWORK
 #---------------------------------------------------
@@ -352,8 +398,6 @@ uci set network.wwan.proto='dhcp'
 echo "NETWORK CONFIG"
 #---------------------------------------------------
 uci set network.lan.netmask='255.255.255.0'
-uci set network.lan.netmask='255.255.255.0'
-uci set network.lan.ip6assign='60'
 uci set network.lan.ip6assign='60'
 uci set network.wan=interface
 uci set network.wan.ifname='wlan0'
@@ -506,7 +550,7 @@ config_wireless web $2 $3
                                                                 printf "%s\n" "$SCAN"
                                                                 echo "################"
                                                                 LIST=$(iw wlan0 scan | grep SSID | awk -F':' '{print $2}' | sed -e 's/^\ *//' | wc -l)
-                                                              	config_wireless
+                                                                config_wireless
                                                         else
                                                         LIST=0
                                                         echo "ulangi lagi"
@@ -575,7 +619,7 @@ cat << EOF
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
                 <link rel="stylesheet" href="/css/my.css" crossorigin="anonymous">
-		<script src="/js/jquery-1.8.0.min.js"></script>
+                <script src="/js/jquery-1.8.0.min.js"></script>
         </head>
 <body class="text-center">
 <main role="main" class="container">
@@ -589,7 +633,7 @@ footer(){
 cat << EOF
 <div style="bottom: 0;position: absolute;width: 100%;height: 60px;line-height: 60px;color: white;" class="footer">
         <div class="container">
-        	<span class="text-muted">oniversal indonesia - oss (2021)</span>
+                <span class="text-muted">oniversal indonesia - oss (2021)</span>
         </div>
 </div>
 </body>
@@ -623,15 +667,15 @@ wifi_setting(){
 cat <<EOF
         <form method='get'>
                 <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
-		<div class="input-group">
-                	<input type='hidden' name='gui' value='yes'></input>
-                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
-                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
+                <div class="input-group">
+                        <input type='hidden' name='gui' value='yes'></input>
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;"  placeholder='input ssid here' type='text' id='ssid' name='ssid' value="$SSID" type="email" class=" col px-md-3 form-control transparent-input" >
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="password" class="form-control transparent-input col px-md-3" placeholder='input password here'  type='password' id='pass' name='pass' value="$PASSWORD" >
                 </div>
-		<div class="btn-group">
-			<input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
-		</div>
-		</div>
+                <div class="btn-group">
+                        <input  class="btn btn-success btn-sm mt-0" type='submit' id='wifi-set' name='wifi-set' value='set-wifi'>
+                </div>
+                </div>
         </form>
 EOF
 }
@@ -640,14 +684,14 @@ shell_gui(){
 cat <<EOF
 <form id="web_shell" method='get'>
         <div class="btn-group-vertical mt-n5 px-md-5 mt-5 row" role="group">
-		<div class="input-group">
-                	<input type='hidden' name='gui' value='yes'></input>
-                	<input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
+                <div class="input-group">
+                        <input type='hidden' name='gui' value='yes'></input>
+                        <input style="color:#24ed3b;background-color: rgba(0, 0, 0, 0);border:none;" type="text" class="form-control transparent-input col px-md-3" placeholder='input bash script here'  type='password' name='command' >
                 </div>
-		<div class="btn-group">
-			<input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
-        	</div>
-	</div>
+                <div class="btn-group">
+                        <input class="btn btn-success btn-sm mt-0" type="submit" name='kirim' value='kirim'></input>
+                </div>
+        </div>
 </form>
 EOF
 }
@@ -660,11 +704,11 @@ first_view(){
 cat <<EOF
         <form method="get" action="">
                 <div class="btn-group-vertical row" role="group">
-			<div class="btn-group">
-				<input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
-				</input>
+                        <div class="btn-group">
+                                <input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
+                                </input>
                         </div>
-			<div class="btn-group">
+                        <div class="btn-group">
                                 <input name="openwifisetting" type="submit" class="btn" value="setting wifi"></input>
                                 <input name="scan" type="submit" class="btn" value="scanwifi"></input>
                                 <input name="shell_gui" type="submit" class="btn" value="cli Web Gui"></input>
