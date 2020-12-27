@@ -5,7 +5,7 @@ R_USER=$3
 R_HOST=$4
 ssh -L $L_PROXY:127.0.0.1:$L_PROXY -N -f $R_USER@$R_HOST
 if [ $? == 1 ];then
-echo "ssh_proxy 1080 oniversal oniversal.duckdns.org" 
+echo "ssh_proxy proxy 1080 oniversal oniversal.duckdns.org" 
 fi
 }
 
