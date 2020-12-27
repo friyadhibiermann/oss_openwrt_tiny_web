@@ -1,3 +1,166 @@
+ssh_proxy(){
+SOCKS=$1
+L_PROXY=$2
+R_USER=$3
+R_HOST=$4
+ssh -L $L_PROXY:127.0.0.1:$L_PROXY -N -f $R_USER@$R_HOST
+if [ $? == 1 ];then
+echo "ssh_proxy 1080 oniversal oniversal.duckdns.org" 
+fi
+}
+
+redsocks_config(){
+base {
+        // debug: connection progress & client list on SIGUSR1
+        log_debug = on;
+
+        // info: start and end of client session
+        log_info = on;
+
+        /* possible `log' values are:
+         *   stderr
+         *   file:/path/to/file
+         *   syslog:FACILITY  facility is any of "daemon", "local0"..."local7"
+         */
+        log = stderr;
+
+        // detach from console
+        daemon = off;
+
+        /* Change uid, gid and root directory, these options require root
+         * privilegies on startup.
+         * Note, your chroot may requre /etc/localtime if you write log to syslog.
+         * Log is opened before chroot & uid changing.
+         */
+        // user = nobody;
+        // group = nobody;
+        // chroot = "/var/chroot";
+
+        /* possible `redirector' values are:
+         *   iptables   - for Linux
+         *   ipf        - for FreeBSD
+         *   pf         - for OpenBSD
+         *   generic    - some generic redirector that MAY work
+         */
+        redirector = iptables;
+}
+
+redsocks {
+cat > /etc/config/redsocks.conf <<EOF
+base {
+        // debug: connection progress & client list on SIGUSR1
+        log_debug = on;
+
+        // info: start and end of client session
+        log_info = on;
+
+        /* possible `log' values are:
+         *   stderr
+         *   file:/path/to/file
+         *   syslog:FACILITY  facility is any of "daemon", "local0"..."local7"
+         */
+        log = stderr;
+
+        // detach from console
+        daemon = off;
+
+        /* Change uid, gid and root directory, these options require root
+         * privilegies on startup.
+         * Note, your chroot may requre /etc/localtime if you write log to syslog.
+         * Log is opened before chroot & uid changing.
+         */
+        // user = nobody;
+        // group = nobody;
+        // chroot = "/var/chroot";
+
+        /* possible `redirector' values are:
+         *   iptables   - for Linux
+         *   ipf        - for FreeBSD
+         *   pf         - for OpenBSD
+         *   generic    - some generic redirector that MAY work
+         */
+        redirector = iptables;
+}
+
+redsocks {
+        /* `local_ip' defaults to 127.0.0.1 for security reasons,
+         * use 0.0.0.0 if you want to listen on every interface.
+         * `local_*' are used as port to redirect to.
+         */
+        local_ip = 0.0.0.0;
+        local_port = 12345;
+
+        // `ip' and `port' are IP and tcp-port of proxy-server
+        ip = 127.0.0.1;
+        port = 1080;
+
+
+        // known types: socks4, socks5, http-connect, http-relay
+        type = socks5;
+
+        // login = "foobar";
+        // password = "baz";
+}
+
+redudp {                                                         
+        // `local_ip' should not be 0.0.0.0 as it's also used for outgoing
+        // packets that are sent as replies - and it should be fixed      
+        // if we want NAT to work properly.                               
+        local_ip = 127.0.0.1;                                             
+        local_port = 10053;                                               
+                                                                          
+        // `ip' and `port' of socks5 proxy server.                        
+        ip = 127.0.0.1;                                                   
+        port = 1080;                                                      
+        //login = username;                                               
+        //password = pazzw0rd;                                            
+                                                                          
+        // kernel does not give us this information, so we have to duplicate it
+        // in both iptables rules and configuration file.  By the way, you can 
+        // set `local_ip' to 127.45.67.89 if you need more than 65535 ports to 
+        // forward ;-)                                                         
+        // This limitation may be relaxed in future versions using contrack-tools.
+        dest_ip = 8.8.8.8;                                                        
+        dest_port = 53;                                                           
+                                                                                  
+        udp_timeout = 30;                                                         
+        udp_timeout_stream = 180;                                                 
+}                                                                                 
+                                                                                  
+// you can add more `redsocks' and `redudp' sections if you need.  
+EOF
+}
+
+redsocks_iptables(){
+# Create new chain                                                                                                                                           
+iptables -t nat -X REDSOCKS                                                                                                                                  
+iptables -t nat -N REDSOCKS                                                                                                                                  
+                                                                                                                                                             
+# Ignore LANs and some other reserved addresses.                                                                                                             
+iptables -t nat -A REDSOCKS -d 0.0.0.0/8 -j RETURN                                                                                                           
+iptables -t nat -A REDSOCKS -d 10.0.0.0/8 -j RETURN                                                                                                          
+iptables -t nat -A REDSOCKS -d 10.10.1.0/22 -j RETURN                                                                                                        
+iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN                                                                                                         
+iptables -t nat -A REDSOCKS -d 169.254.0.0/16 -j RETURN                                                                                                      
+iptables -t nat -A REDSOCKS -d 172.16.0.0/12 -j RETURN                                                                                                       
+iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN                                                                                                      
+iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN                                                                                                         
+iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN                                                                                                         
+#iptables -t nat -A REDSOCKS -d 122.248.x.x/31 -j RETURN                                                                                                  
+                                                                                                                                                             
+iptables -t nat -A REDSOCKS -j LOG -p tcp --syn --log-level info --log-prefix "rs "                                                                          
+                                                                                                                                                             
+# Anything else should be redirected to port 12345                                                                                                           
+#iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345                                                                                             
+iptables -t nat -A REDSOCKS -p tcp -j DNAT --to-destination 127.0.0.1:12345                                                                                  
+                                                                                                                                                             
+iptables -t nat -A REDSOCKS -j LOG -p tcp --syn --log-level info --log-prefix "err "                                                                         
+                                                                                                                                                             
+# Any tcp connection made by `darkk' should be redirected.                                                                                                   
+iptables -t nat -I OUTPUT 1 -p tcp -j REDSOCKS                                                                                                               
+iptables -t nat -I PREROUTING 1 -p tcp -s 192.168.1.0/22 -j REDSOCKS 
+}
+
 oss_firewall(){
 #DNS accept
 iptables -A INPUT -i "$(uci get network.wan.ifname)" -p udp --sport 53 -j ACCEPT
