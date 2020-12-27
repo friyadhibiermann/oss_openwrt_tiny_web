@@ -3,7 +3,7 @@ SOCKS=$1
 L_PROXY=$2
 R_USER=$3
 R_HOST=$4
-sshpass -p "$1" ssh -L ${L_PROXY}:127.0.0.1:{$L_PROXY} -N -f ${R_USER}@${R_HOST}
+sshpass -p "$1" ssh -L ${L_PROXY}:127.0.0.1:${L_PROXY} -N -f ${R_USER}@${R_HOST}
 if [ $? == 1 ];then
 echo "ssh_proxy [remote password ssh] 1080 oniversal oniversal.duckdns.org" 
 fi
