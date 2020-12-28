@@ -21,7 +21,7 @@ include $(TOPDIR)/rules.mk
 PKG_VERSION:=1.0.4
 PKG_NAME:=oss_$(PKG_VERSION)
 PKG_MAINTAINER:=Bandung, ONIVERSAL <friyadhibiermann>, indonesian
-DEPENDS:=
+DEPENDS:=+libwolfssl24 +uhttpd +libustream-wolfssl +libuhttpd-wolfssl
 
 # # directory in your OpenWrt SDK directory
 
