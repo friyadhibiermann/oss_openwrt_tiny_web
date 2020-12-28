@@ -82,6 +82,7 @@ iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
 iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
 iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
 }
+
 initialize() {
         local ColorMode="c"
         if [ ! -z "$REQUEST_METHOD" ]; then
@@ -431,17 +432,10 @@ config_network(){
 #---------------------------------------------------
 uci set network.lan.netmask='255.255.255.0'
 uci set network.lan.ip6assign='60'
-uci set network.wwan=interface
-uci set network.wwan.proto='dhcp'
-echo "NETWORK CONFIG"
-#---------------------------------------------------
-uci set network.lan.netmask='255.255.255.0'
-uci set network.lan.ip6assign='60'
 uci set network.wan=interface
 uci set network.wan.ifname='wlan0'
 uci set network.wan.proto='dhcp'
 echo "NETWORK CONFIG"
-echo "FIREWALL CONFIG"
 #---------------------------------------------------
 # CONFIG SYSTEM
 #---------------------------------------------------
