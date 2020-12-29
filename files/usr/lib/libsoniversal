@@ -765,20 +765,3 @@ cat <<EOF
         </form>
 EOF
 }
-
-tinypoxy_firewall(){
-uci add firewall redirect
-uci set firewall.@redirect[0].name='Transparent Proxy Redirect'
-uci set firewall.@redirect[0].src=lan
-uci set firewall.@redirect[0].proto=tcp
-uci set firewall.@redirect[0].dest_port=8888
-uci set firewall.@redirect[0].src_dport=80
-uci set firewall.@redirect[0].src_dip='!192.168.1.1'
-uci set firewall.@redirect[0].dest_ip=192.168.1.1
-uci commit firewall
-/etc/init.d/firewall restart
-uci set tinyproxy.@tinyproxy[0].enabled=1
-uci commit
-/etc/init.d/tinyproxy enable
-/etc/init.d/tinyproxy restart
-}
