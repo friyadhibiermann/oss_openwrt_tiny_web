@@ -7,7 +7,6 @@ if [ $? == 1 ];then
         echo "ssh_proxy [remote password ssh] 1080 oniversal localhost"
 fi
 }
-
 oss_firewall() {
 case $1 in
        'proxy')
