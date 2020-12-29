@@ -8,6 +8,8 @@ echo '
 ssh_proxy
 --------------firewall--------------
 oss_firewall
+oss_firewall proxy
+oss_firewall wifi
 oss_firewall_acceptall
 redirect_http_https
 Accept_wifi_inf
