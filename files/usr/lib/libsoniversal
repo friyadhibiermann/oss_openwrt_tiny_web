@@ -49,12 +49,23 @@ fi
 oss_firewall() {
 case $1 in
        'proxy')
-       echo "proxy"
+         echo "tinyproxy"
+         DNS_accept
+         Accept_wifi_inf
+         Accept_local
+         port_proxy="$(uci -q get tinyproxy.@tinyproxy[0].Port='8888')"
+         iptables -t nat -I PREROUTING -p tcp --dport 443 -j REDIRECT --to-port $port_proxy
+         iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port $port_proxy
        ;;
         'wifi')
         Accept_wifi_inf
         redirect_http_https
         echo "accept wifi and redirect 80 - 443"
+        ;;
+        'clean')
+        iptables -X
+        iptables -F
+        iptables -t nat -F
         ;;
         *)
         oss_firewall_acceptall
