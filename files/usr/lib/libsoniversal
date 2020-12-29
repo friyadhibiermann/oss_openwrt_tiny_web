@@ -53,9 +53,9 @@ case $1 in
          DNS_accept
          Accept_wifi_inf
          Accept_local
-         port_proxy="$(uci -q get tinyproxy.@tinyproxy[0].Port='8888')"
-         iptables -t nat -I PREROUTING -p tcp --dport 443 -j REDIRECT --to-port $port_proxy
+         port_proxy="$(uci -q get tinyproxy.@tinyproxy[0].Port)"
          iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port $port_proxy
+         
        ;;
         'wifi')
         Accept_wifi_inf
@@ -823,5 +823,5 @@ uci set tinyproxy.@tinyproxy[0].StartServers='10'
 uci set tinyproxy.@tinyproxy[0].MaxRequestsPerChild='0'
 uci set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
 uci set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
-uci set tinyproxy.@tinyproxy[0].Allow='192.168.100.0/24'
+uci set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
 }
