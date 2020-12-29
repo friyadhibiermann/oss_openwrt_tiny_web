@@ -79,6 +79,7 @@ echo "Allow_SSH"
 
 redirect_http_https(){
 iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 443
+iptables -t nat -I PREROUTING -p tcp --dport 80 -d 192.168.1.0/24 -j REDIRECT --to-port 443
 }
 
 Accept_wifi_inf() {
