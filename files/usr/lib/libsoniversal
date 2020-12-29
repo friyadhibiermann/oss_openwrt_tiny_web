@@ -1,3 +1,12 @@
+oss_help(){
+func='ssh_proxy oss_firewall oss_firewall_acceptall redirect_http_https Accept_wifi_inf DNS_accept HTTPS_accept\ 
+        Accept_local config_network config_wireless first_view content_html shell_gui wifi_setting result \
+        footer _head oniversal shell query_fix get_post scan_ssid base_script ping_test config_wireless config_network'
+for i in "${func}";do
+printf '%s\n' "$i"
+done
+}
+
 ssh_proxy(){
 L_PROXY=$1
 R_USER=$2
@@ -86,16 +95,6 @@ iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
 iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
 iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
 
-}
-ssh_proxy(){
-SOCKS=$1
-L_PROXY=$2
-R_USER=$3
-R_HOST=$4
-sshpass -p "$1" ssh -L ${L_PROXY}:127.0.0.1:${L_PROXY} -N -f ${R_USER}@${R_HOST}
-if [ $? == 1 ];then
-echo "ssh_proxy [remote password ssh] 1080 oniversal oniversal.duckdns.org" 
-fi
 }
 
 initialize() {
@@ -383,64 +382,6 @@ exroot(){
         fi
 }
 
-waitForHost()
-{
-IPADDRESS=$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
-echo "Testing..."
-i=0
-PING_CMD="ping -t 3 -c 1 google.com > /dev/null 2>&1"
-
-eval $PING_CMD
-
-if [ $( echo $IPADDRESS | wc -l ) == 1 ] ; then
-    echo "Already connected...."
-    sleep 2
-    echo "$IPADDRESS"
-else
-    echo -n "Waiting for connection..."
-
-    while true; do
-        i=$(($i+1))
-        eval $PING_CMD
-        if [[ $? -eq 0 ]]; then
-            echo
-            echo Connected.
-            printf "Ip Address: $IPADDRESS\SSID: $scan_ssid"
-            break
-        else
-            sleep 1
-            echo -n .
-            if [ $i == 10 ];then
-                echo "conection time out, please restart"
-                read -p "are you want to restart automatically? :" ans
-                case $ans in
-                        'yes')
-                        reboot
-                        ;;
-                        'no')
-                        read -p "are you want to restart network connection ? : " ans2
-                        case $ans2 in
-                                'yes')
-                                /etc/init.d/network restart
-                                ;;
-                                'no')
-                                break
-                                ;;
-                                *)
-                                break
-                                ;;
-                        esac
-                        ;;
-                        *)
-                        break
-                        ;;
-                esac
-            fi
-        fi
-    done
-fi
-}
-
 config_network(){
 #---------------------------------------------------
 # CONFIG NETWORK
@@ -504,7 +445,7 @@ echo "DHCP CONFIG"
 uci commit
 wifi up
 wifi up radio0
-waitForHost 10
+ping_test
 oss_firewall
 exit 0
 }
@@ -555,6 +496,7 @@ if [ "$?" = 0 ]
 then
   echo "internet connected"
   echo "SSID: $(scan_ssid)"
+  sleep 3
   echo "ipaddress: $IPADDRESS"
   exit 0
 else
