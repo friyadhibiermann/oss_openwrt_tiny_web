@@ -49,7 +49,7 @@ fi
 oss_firewall() {
 case $1 in
        'proxy')
-         echo "tinyproxy"
+         echo "tinyproxy transperent proxy"
          tinyproxy_config
          DNS_accept
          Accept_wifi_inf
