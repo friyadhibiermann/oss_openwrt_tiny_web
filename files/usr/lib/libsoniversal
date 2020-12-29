@@ -1,3 +1,131 @@
+oss_help() {
+echo "help :"
+echo "------------SSH-PROXY-----------"
+echo "ssh_proxy"
+echo "------------firewall------------"
+echo "oss_firewall"
+echo "oss_firewall_acceptall"
+echo "redirect_http_https"
+echo "HTTPS_accept"
+echo "Accept_local"
+echo "Accept_lo_inf"
+echo "Accept_wifi_inf"
+echo "Allow_SSH"
+echo "------------oss-webgui-cli----------"
+echo "_head"
+echo "query_fix"
+echo "first_view'
+echo "result"
+echo "content_html"
+echo "wifi_setting"
+echo "shell_gui"
+echo "shell"
+echo "base_script"
+echo "oniversal"
+echo "footer"
+echo "------------ misc -----------------"
+echo "get_post"
+echo "oniversal"
+echo "base_script"
+echo "config_wireless"
+echo "config_network"
+echo "waitForHost"
+echo "ping_test"
+}
+
+ssh_proxy(){
+L_PROXY=$1
+R_USER=$2
+R_HOST=$3
+        ssh -L ${L_PROXY}:127.0.0.1:${L_PROXY} -N -f ${R_USER}@${R_HOST}
+if [ $? == 1 ];then
+        echo "ssh_proxy [remote password ssh] 1080 oniversal localhost"
+fi
+}
+
+#oss_firewall() {
+#case $1 in
+        #'proxy')
+        #echo "proxy"
+        #;;
+        #'wifi')
+        #Accept_wifi_inf
+        #redirect_http_https
+        #echo "accept wifi and redirect 80 - 443"
+        #;;
+        #*)
+        #oss_firewall_acceptall
+#       ;;
+#esac
+#}
+
+oss_firewall_acceptall() {
+DNS_accept
+echo "DNS_accept"
+HTTPS_accept
+echo "HTTPS_accept"
+Accept_local
+echo "Accept_local"
+Accept_lo_inf
+echo "Accept_lo_inf"
+Accept_wifi_inf
+echo "Accept_wifi_inf"
+Allow_SSH
+echo "Allow_SSH"
+
+}
+
+redirect_http_https(){
+
+iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 443
+
+}
+
+Accept_wifi_inf() {
+iptables -A INPUT -i wlan0 -j ACCEPT -m comment --comment "wlan INPUT"
+iptables -A OUTPUT -o wlan0 -j ACCEPT -m comment --comment "wlan OUTPUT"
+}
+
+DNS_accept() {
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -i "$(uci get network.wan.ifname)" -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -o "$(uci get network.wan.ifname)" -p tcp --dport 53 -j ACCEPT
+iptables -A FORWARD -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+iptables -t nat -I POSTROUTING -o "$(uci get network.wan.ifname)" -j MASQUERADE
+iptables -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+}
+
+HTTPS_accept() {
+iptables -A INPUT -j ACCEPT -p tcp --dport 443
+iptables -A OUTPUT -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --sport 443
+iptables -A FORWARD -j ACCEPT -p tcp --dport 443
+}
+
+Accept_local() {
+iptables -A INPUT -s 192.168.1.0/24 -j ACCEPT
+iptables -A OUTPUT -d 192.168.1.0/24 -j ACCEPT
+iptables -A FORWARD -d 192.168.1.0/24 -j ACCEPT
+}
+
+Accept_lo_inf() {
+
+iptables -A INPUT -i lo -j ACCEPT -m comment --comment "lo INPUT"
+iptables -A OUTPUT -o lo -j ACCEPT -m comment --comment "lo OUTPUT"
+
+}
+
+Allow_SSH() {
+iptables -I INPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "inSSH dport"
+iptables -I INPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "inSSH sport"
+iptables -I OUTPUT -p tcp --sport 22 -j ACCEPT -m comment --comment "outSSH sport"
+iptables -I OUTPUT -p tcp --dport 22 -j ACCEPT -m comment --comment "outSSH dport"
+
+}
 ssh_proxy(){
 SOCKS=$1
 L_PROXY=$2
