@@ -44,7 +44,7 @@ R_USER=$2
 R_HOST=$3
         ssh -L ${L_PROXY}:127.0.0.1:${L_PROXY} -N -f ${R_USER}@${R_HOST}
 if [ $? == 1 ];then
-        echo "ssh_proxy [remote password ssh] 1080 oniversal localhost"
+        echo "ssh_proxy 1080 oniversal localhost"
 fi
 }
 
