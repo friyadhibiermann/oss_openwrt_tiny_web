@@ -50,6 +50,7 @@ oss_firewall() {
 case $1 in
        'proxy')
          echo "tinyproxy"
+         tinyproxy_config
          DNS_accept
          Accept_wifi_inf
          Accept_local
@@ -806,22 +807,22 @@ else
 fi
 }
 tinyproxy_config(){
-uci set tinyproxy.@tinyproxy[0]=tinyproxy
-uci set tinyproxy.@tinyproxy[0].enabled='1'
-uci set tinyproxy.@tinyproxy[0].User='nobody'
-uci set tinyproxy.@tinyproxy[0].Group='nogroup'
-uci set tinyproxy.@tinyproxy[0].Port='8888'
-uci set tinyproxy.@tinyproxy[0].Timeout='600'
-uci set tinyproxy.@tinyproxy[0].DefaultErrorFile='/usr/share/tinyproxy/default.html'
-uci set tinyproxy.@tinyproxy[0].StatFile='/usr/share/tinyproxy/stats.html'
-uci set tinyproxy.@tinyproxy[0].LogFile='/var/log/tinyproxy.log'
-uci set tinyproxy.@tinyproxy[0].LogLevel='Info'
-uci set tinyproxy.@tinyproxy[0].MaxClients='100'
-uci set tinyproxy.@tinyproxy[0].MinSpareServers='5'
-uci set tinyproxy.@tinyproxy[0].MaxSpareServers='20'
-uci set tinyproxy.@tinyproxy[0].StartServers='10'
-uci set tinyproxy.@tinyproxy[0].MaxRequestsPerChild='0'
-uci set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
-uci set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
-uci set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
+  uci set tinyproxy.@tinyproxy[0]=tinyproxy
+  uci set tinyproxy.@tinyproxy[0].enabled='1'
+  uci set tinyproxy.@tinyproxy[0].User='nobody'
+  uci set tinyproxy.@tinyproxy[0].Group='nogroup'
+  uci set tinyproxy.@tinyproxy[0].Port='8888'
+  uci set tinyproxy.@tinyproxy[0].Timeout='600'
+  uci set tinyproxy.@tinyproxy[0].DefaultErrorFile='/usr/share/tinyproxy/default.html'
+  uci set tinyproxy.@tinyproxy[0].StatFile='/usr/share/tinyproxy/stats.html'
+  uci set tinyproxy.@tinyproxy[0].LogFile='/var/log/tinyproxy.log'
+  uci set tinyproxy.@tinyproxy[0].LogLevel='Info'
+  uci set tinyproxy.@tinyproxy[0].MaxClients='100'
+  uci set tinyproxy.@tinyproxy[0].MinSpareServers='5'
+  uci set tinyproxy.@tinyproxy[0].MaxSpareServers='20'
+  uci set tinyproxy.@tinyproxy[0].StartServers='10'
+  uci set tinyproxy.@tinyproxy[0].MaxRequestsPerChild='0'
+  uci set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
+  uci set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
+  uci set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
 }
