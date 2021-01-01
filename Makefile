@@ -36,9 +36,11 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/www/cgi-bin
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/oss $(1)/www/cgi-bin
 	$(CP) $(PKG_BUILD_DIR)/uhttpd.key $(1)/etc
 	$(CP) $(PKG_BUILD_DIR)/uhttpd.crt $(1)/etc
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/iptables $(1)/etc/init.d
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
