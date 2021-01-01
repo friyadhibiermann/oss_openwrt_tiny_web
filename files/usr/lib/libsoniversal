@@ -808,11 +808,13 @@ else
 fi
 }
 tinyproxy_config(){
+uci -q batch << EOF
   uci set tinyproxy.@tinyproxy[0].enabled='1'
   uci set tinyproxy.@tinyproxy[0].Port='8888'
   uci set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
   uci set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
   uci set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
-  /etc/init.d/tinyproxy restart
-  /etc/init.d/tinyproxy enable
+EOF
+/etc/init.d/tinyproxy restart
+/etc/init.d/tinyproxy enable
 }
