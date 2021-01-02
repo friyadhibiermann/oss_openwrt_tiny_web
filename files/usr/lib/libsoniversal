@@ -842,4 +842,6 @@ uci -q batch << EOF
   set system.ntp.server='0.openwrt.pool.ntp.org' '1.openwrt.pool.ntp.org' '2.openwrt.pool.ntp.org' '3.openwrt.pool.ntp.org'
   set system.ntp.enable_server='1'
 EOF
+/etc/init.d/system restart
+date
 }
