@@ -92,6 +92,7 @@ case $1 in
   'opkg_cache_dns')
   /etc/init.d/dnsmasq restart | rm -rf /tmp/opkg-lists/* | sync && echo 3 > /proc/sys/vm/drop_caches | free
   ;;
+esac
 }
 oss_firewall_acceptall() {
 DNS_accept
