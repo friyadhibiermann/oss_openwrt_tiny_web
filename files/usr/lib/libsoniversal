@@ -6,6 +6,8 @@ echo '
         OSS ONIVERSAL FUNCTION
 ----------------ssh-----------------
 ssh_proxy
+----------------time fix------------
+time_fix > /dev/null 2>&1 | date
 --------------clean--------------
 oss_clean cache
 oss_clean opkg_cache
