@@ -6,6 +6,10 @@ echo '
         OSS ONIVERSAL FUNCTION
 ----------------ssh-----------------
 ssh_proxy
+--------------clean--------------
+oss_clean cache
+oss_clean opkg_cache
+oss_clean opkg_cache_dns
 --------------firewall--------------
 oss_firewall
 oss_firewall proxy
