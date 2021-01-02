@@ -825,12 +825,21 @@ fi
 }
 tinyproxy_config(){
 uci -q batch << EOF
-  uci set tinyproxy.@tinyproxy[0].enabled='1'
-  uci set tinyproxy.@tinyproxy[0].Port='8888'
-  uci set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
-  uci set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
-  uci set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
+  set tinyproxy.@tinyproxy[0].enabled='1'
+  set tinyproxy.@tinyproxy[0].Port='8888'
+  set tinyproxy.@tinyproxy[0].ViaProxyName='tinyproxy'
+  set tinyproxy.@tinyproxy[0].ConnectPort='443' '563'
+  set tinyproxy.@tinyproxy[0].Allow='127.0.0.1'
 EOF
 /etc/init.d/tinyproxy restart
 /etc/init.d/tinyproxy enable
+}
+time_fix(){
+uci -q batch << EOF
+  set system.@system[0].timezone='UTC+7'
+  set system.@system[0].zonename='Asia/Jakarta'
+  set system.ntp.enabled='1'
+  set system.ntp.server='0.openwrt.pool.ntp.org' '1.openwrt.pool.ntp.org' '2.openwrt.pool.ntp.org' '3.openwrt.pool.ntp.org'
+  set system.ntp.enable_server='1'
+EOF
 }
