@@ -8,6 +8,7 @@ DB_PASS="$(uci get oniversal.login.password)"
 STATUS="$(uci get oniversal.login.status)"
 method=$REQUEST_METHOD
 content_html
+if [ $STATUS == 1 ];then
 if [ "$(get_post kirim)" == 'kirim' ];then
         CMD=$(get_post command)
         echo "#!/bin/sh" > /tmp/script.sh
@@ -64,6 +65,20 @@ if [ "$(get_post dev-info)" == "Device Information" ];then
         result
         footer
 fi
+if [ "$(get_post openfirewall)" == "firewall config" ];then
+        LIST="$(ifconfig -a | sed 's/[ \t].*//;/^$/d')"
+        _head
+        first_view
+        _html_iptables
+        footer
+fi
+
+if [ "$(get_post logout)" == "logout" ];then
+        uci set oniversal.login.status='0'
+        uci commit oniversal
+        echo '<meta http-equiv="refresh" content="1;url=/" />'
+fi
+fi
 if [ $method = 'GET' ] && [ $STATUS == 1 ] && [ $(get_post gui) == 'yes' ];then
 _head
 echo "$(first_view)"
@@ -84,4 +99,6 @@ elif [ $method = 'GET' ] && [ $(get_post auth) == 'json' ] || [ $(get_post gui) 
                 DATA="{\"error\":\"$ERROR\",\"username\":\"$USER\",\"password\":\"$PASS\"}"
                 echo $DATA
         fi
+elif [ $STATUS == 0 ];then
+        echo "silahkan login terlebih dahulu"
 fi
