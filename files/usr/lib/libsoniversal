@@ -79,6 +79,18 @@ case $1 in
 esac
 }
 
+oss_clean(){
+case $1 in
+  'cache')
+  sync && echo 3 > /proc/sys/vm/drop_caches | free > /dev/null 2>&1 &
+  ;;
+  'opkg_cache')
+  rm -rf /tmp/opkg-lists/* | sync && echo 3 > /proc/sys/vm/drop_caches | free
+  ;;
+  'opkg_cache_dns')
+  /etc/init.d/dnsmasq restart | rm -rf /tmp/opkg-lists/* | sync && echo 3 > /proc/sys/vm/drop_caches | free
+  ;;
+}
 oss_firewall_acceptall() {
 DNS_accept
 echo "DNS_accept"
