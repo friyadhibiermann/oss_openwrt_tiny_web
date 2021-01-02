@@ -673,6 +673,8 @@ cat << EOF
                 <link rel="stylesheet" href="/css/bootstrap.min.css" crossorigin="anonymous">
                 <link rel="stylesheet" href="/css/my.css" crossorigin="anonymous">
                 <script src="/js/jquery-1.8.0.min.js"></script>
+                <script src="/js/popper.min.js"></script>
+                <script src="/js/bootstrap.min.js"></script>
         </head>
 <body class="text-center">
 <main role="main" class="container">
@@ -689,6 +691,8 @@ cat << EOF
                 <span class="text-muted">oniversal indonesia - oss (2021)</span>
         </div>
 </div>
+<script src="/js/loader.js" type="text/javascript"></script>
+<script src="/js/home.js" type="text/javascript"></script>
 </body>
 </html>
 EOF
@@ -748,6 +752,57 @@ cat <<EOF
 </form>
 EOF
 }
+_html_iptables(){
+cat <<EOF
+<form method="get" action="">
+<div class="btn-oss px-4 btn-group-vertical row">
+        <div data-toggle="buttons">
+                <div class=" btn-group btn-group-justified">
+                        <label class="btn btn-primary active">
+                        <input type="radio" name="options" id="option1" autocomplete="off" checked> ACCEPT
+                        </label>
+                        <label class="btn btn-primary">
+                        <input type="radio" name="options" id="option2" autocomplete="off"> DROP
+                        </label>
+                        <label class="btn btn-primary">
+                        <input type="radio" name="options" id="option3" autocomplete="off"> FORWARD
+                        </label>
+                </div>
+                <div class="btn-group btn-group-justified">
+                        <label class="btn btn-primary">
+                        <input type="radio" name="options" id="option4" autocomplete="off"> RETURN
+                        </label>
+                        <label class="btn btn-primary">
+                        <input type="radio" name="options" id="option5" autocomplete="off"> REDIRECT
+                        </label>
+                </div>
+                $(device_list)
+                <div class="btn-group btn-group-justified">
+                        <input class="form-control" name="inport" id="inport" type="text" placeholder="in port">
+                </div>
+                <div class="btn-group btn-group-justified">
+                        <input class="form-control" name="address" id="addr" type="text" placeholder="ip address">
+                </div>
+                <div class="btn-group btn-group-justified">
+                        <input class="form-control"  name="outport" id="outport" type="text" placeholder="out port">
+                </div>
+                $(device_list)
+                <div style="margin-top:10px;" class="btn-group btn-group-justified">
+                        <input class="btn btn-primary" name="save" id="save" type="submit" value="SAVE"></input>
+                        <input class="btn btn-primary" name="fw-send" id="fw-send" type="submit" value="SEND"></input>
+                </div>
+        </div>
+</div>
+</form>
+EOF
+}
+device_list(){
+echo '<select class="form-control" name="interface" id="inf">'
+for i in $LIST;do
+        echo "<option value=\"$i\">$i</option>"
+done
+echo "</select>"
+}
 content_html(){
 echo "Content-type: text/html"
 echo ""
@@ -760,11 +815,15 @@ cat <<EOF
                         <div class="btn-group">
                                 <input name="dev-info" id="dev-info" type="submit" class="btn btn-secondary" value="Device Information">
                                 </input>
+                                <input name="logout" type="submit" class="btn btn-danger" value="logout"></input>
                         </div>
                         <div class="btn-group">
                                 <input name="openwifisetting" type="submit" class="btn" value="setting wifi"></input>
                                 <input name="scan" type="submit" class="btn" value="scanwifi"></input>
                                 <input name="shell_gui" type="submit" class="btn" value="cli Web Gui"></input>
+                        </div>
+                        <div class="btn-group">
+                                <input name="openfirewall" type="submit" class="btn btn-secondary" value="firewall config"></input>
                         </div>
                 </div>
         </form>
